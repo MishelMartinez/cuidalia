@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#5BA8A2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CuidalIA · Tu experiencia vale</title>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;background:#F0F4F4;color:#1E3340;min-height:100vh;overflow-x:hidden}
+button{cursor:pointer;font:inherit;border:none;background:none}
+input,select,textarea{font:inherit}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ===== CSS VARIABLES ===== */
+:root{
+  --mint:#5BA8A2;
+  --mint-dark:#3D8A84;
+  --mint-light:#E8F5F3;
+  --lilac:#9B7BB8;
+  --lilac-light:#F0EAF7;
+  --clay:#B8866A;
+  --clay-light:#FAF0E8;
+  --olive:#8FAA5E;
+  --olive-light:#EFF4E6;
+  --ink:#1E3340;
+  --ink-2:#3D5A68;
+  --sub:#6B8490;
+  --canvas:#F0F4F4;
+  --white:#FFFFFF;
+  --line:#DDE8E8;
+  --error:#D94F4F;
+  --error-light:#FDF0F0;
+  --success:#3A9E7E;
+  --success-light:#E8F7F1;
+  --warning:#C97D30;
+  --warning-light:#FEF3E6;
+  --shadow-sm:0 2px 8px rgba(30,51,64,.08);
+  --shadow-md:0 6px 20px rgba(30,51,64,.12);
+  --shadow-lg:0 16px 40px rgba(30,51,64,.16);
+  --radius-sm:8px;
+  --radius-md:14px;
+  --radius-lg:22px;
+  --radius-xl:30px;
+  --nav-h:68px;
+  --header-h:56px;
+  --transition:0.22s ease;
+}
+
+/* ===== APP SHELL ===== */
+#app{
+  width:100%;
+  max-width:440px;
+  min-height:100vh;
+  margin:0 auto;
+  background:var(--white);
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow-lg);
+}
+@media(min-width:900px){
+  body{display:flex;align-items:flex-start;justify-content:center;padding:24px 0;min-height:100vh;background:#CBD8D8}
+  #app{min-height:calc(100vh - 48px);border-radius:var(--radius-xl)}
+}
+
+/* ===== SCREENS ===== */
+.screen{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  background:var(--white);
+  opacity:0;
+  pointer-events:none;
+  transform:translateX(30px);
+  transition:opacity var(--transition),transform var(--transition);
+  overflow:hidden;
+}
+.screen.active{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateX(0);
+  z-index:2;
+}
+.screen.slide-out{
+  opacity:0;
+  transform:translateX(-30px);
+  z-index:1;
+}
+.screen.slide-back{
+  opacity:0;
+  transform:translateX(30px);
+}
+
+/* ===== SCROLL CONTENT ===== */
+.screen-body{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.screen-body::-webkit-scrollbar{display:none}
+
+/* ===== TOP BAR ===== */
+.topbar{
+  height:var(--header-h);
+  background:var(--white);
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  gap:10px;
+  flex-shrink:0;
+  position:relative;
+  z-index:5;
+}
+.topbar-back{
+  width:36px;height:36px;
+  display:grid;place-items:center;
+  border-radius:var(--radius-sm);
+  color:var(--ink);
+  transition:background var(--transition);
+  flex-shrink:0;
+}
+.topbar-back:hover{background:var(--canvas)}
+.topbar-back svg{width:20px;height:20px}
+.topbar-title{flex:1;font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--ink)}
+.topbar-action{width:36px;height:36px;display:grid;place-items:center;border-radius:var(--radius-sm);color:var(--sub)}
+
+/* ===== BRAND LOGO ===== */
+.brand{display:flex;align-items:center;gap:9px}
+.brand-icon{
+  width:36px;height:36px;
+  background:var(--mint);
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+  flex-shrink:0;
+}
+.brand-icon img{width:100%;height:100%;object-fit:cover;display:block}
+.brand-icon .spark{
+  position:absolute;right:-4px;top:-4px;
+  width:13px;height:13px;
+  background:var(--lilac);
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:var(--white);
+}
+.brand-icon .spark svg{width:8px;height:8px}
+.brand-name{font-size:17px;font-weight:800;letter-spacing:-.5px;color:var(--ink)}
+.brand-tag{font-size:10px;color:var(--sub);display:block;letter-spacing:.05em;text-transform:uppercase;margin-top:-2px}
+
+/* ===== BOTTOM NAV ===== */
+#bottom-nav{
+  height:var(--nav-h);
+  background:var(--white);
+  border-top:1px solid var(--line);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  align-items:center;
+  padding:0 4px 8px;
+  flex-shrink:0;
+  position:relative;
+  z-index:5;
+}
+#bottom-nav.hidden{display:none}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:6px 2px;
+  border-radius:var(--radius-sm);
+  color:var(--sub);
+  font-size:9px;font-weight:700;
+  letter-spacing:.02em;
+  transition:all var(--transition);
+  min-height:52px;
+  position:relative;
+}
+.nav-item.active{color:var(--mint-dark);background:var(--mint-light)}
+.nav-item.locked{color:#B8C8CC;pointer-events:none}
+.nav-item svg{width:20px;height:20px;flex-shrink:0}
+.nav-badge{
+  position:absolute;top:4px;right:10px;
+  background:var(--clay);
+  color:var(--white);
+  font-size:8px;font-weight:800;
+  width:15px;height:15px;
+  border-radius:50%;
+  display:grid;place-items:center;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar{
+  height:3px;background:var(--line);
+  position:relative;flex-shrink:0;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--mint),var(--lilac));
+  border-radius:0 2px 2px 0;
+  transition:width 0.4s ease;
+}
+.progress-label{
+  padding:10px 20px 0;
+  display:flex;justify-content:space-between;
+  align-items:center;
+  flex-shrink:0;
+}
+.progress-label span{font-size:11px;color:var(--sub);font-weight:600}
+.progress-label strong{font-size:11px;color:var(--mint-dark);font-weight:800}
+
+/* ===== TYPOGRAPHY ===== */
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mint-dark);text-transform:uppercase}
+.display{font-size:26px;font-weight:800;letter-spacing:-.8px;line-height:1.15;color:var(--ink)}
+.display-sm{font-size:21px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--ink)}
+.lead{font-size:14px;line-height:1.6;color:var(--sub)}
+.body-text{font-size:13px;line-height:1.6;color:var(--ink-2)}
+.caption{font-size:11px;color:var(--sub);line-height:1.5}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-size:14px;font-weight:700;
+  border-radius:var(--radius-md);
+  padding:13px 20px;
+  min-height:48px;
+  transition:all var(--transition);
+  width:100%;
+  letter-spacing:-.1px;
+  position:relative;
+  overflow:hidden;
+}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,0);
+  transition:background var(--transition);
+}
+.btn:active::after{background:rgba(0,0,0,.06)}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+
+.btn-primary{background:linear-gradient(135deg,var(--mint) 0%,var(--mint-dark) 100%);color:var(--white);box-shadow:0 4px 14px rgba(91,168,162,.35)}
+.btn-primary:hover{box-shadow:0 6px 18px rgba(91,168,162,.45);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.55;pointer-events:none;box-shadow:none}
+
+.btn-secondary{background:var(--mint-light);color:var(--mint-dark);border:1.5px solid rgba(91,168,162,.3)}
+.btn-secondary:hover{background:#d8f0ed}
+
+.btn-ghost{background:transparent;color:var(--ink-2);border:1.5px solid var(--line)}
+.btn-ghost:hover{background:var(--canvas)}
+
+.btn-danger{background:var(--error-light);color:var(--error);border:1.5px solid rgba(217,79,79,.2)}
+
+.btn-sm{min-height:38px;padding:9px 14px;font-size:12px;border-radius:var(--radius-sm)}
+.btn-icon{width:44px;height:44px;padding:0;border-radius:var(--radius-md);flex-shrink:0;min-height:auto}
+
+/* ===== INPUTS ===== */
+.form-group{display:flex;flex-direction:column;gap:6px}
+.label{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.02em}
+.input{
+  width:100%;
+  padding:13px 14px;
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-md);
+  font-size:14px;
+  color:var(--ink);
+  background:var(--white);
+  transition:border-color var(--transition),box-shadow var(--transition);
+  min-height:48px;
+  outline:none;
+  -webkit-appearance:none;
+}
+.input:focus{border-color:var(--mint);box-shadow:0 0 0 3px rgba(91,168,162,.15)}
+.input.error{border-color:var(--error);box-shadow:0 0 0 3px rgba(217,79,79,.1)}
+.input.success{border-color:var(--success)}
+.field-error{font-size:11px;color:var(--error);font-weight:600;display:none}
+.field-error.show{display:block}
+.input-icon-wrap{position:relative}
+.input-icon-wrap .input{padding-left:42px}
+.input-icon-wrap .field-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);width:18px;height:18px}
+
+/* ===== CARDS ===== */
+.card{
+  background:var(--white);
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  transition:all var(--transition);
+}
+.card-selectable{cursor:pointer}
+.card-selectable:hover{border-color:var(--mint);background:var(--mint-light)}
+.card-selectable.selected{
+  border-color:var(--mint);
+  background:var(--mint-light);
+  box-shadow:0 0 0 3px rgba(91,168,162,.15);
+}
+.card-selectable.selected .card-check{opacity:1;transform:scale(1)}
+.card-check{
+  width:20px;height:20px;
+  background:var(--mint);
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:var(--white);
+  opacity:0;
+  transform:scale(.6);
+  transition:all var(--transition);
+  flex-shrink:0;
+}
+.card-check svg{width:11px;height:11px}
+
+/* ===== CHIPS ===== */
+.chips-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  padding:7px 12px;
+  border:1.5px solid var(--line);
+  border-radius:100px;
+  font-size:12px;font-weight:600;
+  color:var(--sub);
+  cursor:pointer;
+  transition:all var(--transition);
+  background:var(--white);
+}
+.chip:hover{border-color:var(--mint);color:var(--mint-dark)}
+.chip.selected{background:var(--mint);border-color:var(--mint);color:var(--white)}
+
+/* ===== NOTICE / ALERT ===== */
+.notice{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:12px 14px;
+  border-radius:var(--radius-md);
+  font-size:12px;line-height:1.55;
+}
+.notice svg{width:16px;height:16px;flex-shrink:0;margin-top:1px}
+.notice-info{background:var(--mint-light);color:#2E6B66}
+.notice-warn{background:var(--warning-light);color:#7A4A1A}
+.notice-error{background:var(--error-light);color:#8A2020}
+.notice-success{background:var(--success-light);color:#1D6048}
+.notice-lilac{background:var(--lilac-light);color:#5A3A78}
+
+/* ===== DIVIDER ===== */
+.divider{height:1px;background:var(--line);margin:4px 0}
+.divider-text{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:11px;font-weight:600}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* ===== BADGE ===== */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.03em}
+.badge-mint{background:var(--mint-light);color:var(--mint-dark)}
+.badge-lilac{background:var(--lilac-light);color:#6B48A0}
+.badge-clay{background:var(--clay-light);color:#7A4A25}
+.badge-olive{background:var(--olive-light);color:#4E6A20}
+.badge-demo{background:var(--warning-light);color:var(--warning)}
+
+/* ===== AVATAR ===== */
+.avatar{
+  width:48px;height:48px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--mint),var(--lilac));
+  display:grid;place-items:center;
+  color:var(--white);
+  font-weight:800;font-size:17px;
+  flex-shrink:0;
+}
+.avatar-sm{width:36px;height:36px;font-size:13px}
+
+/* ===== SKILL TAG ===== */
+.skill-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;
+  background:var(--canvas);
+  border-radius:var(--radius-sm);
+  font-size:12px;font-weight:600;
+  color:var(--ink-2);
+}
+.skill-tag svg{width:14px;height:14px;color:var(--mint-dark);flex-shrink:0}
+
+/* ===== STEP INDICATOR ===== */
+.steps{display:flex;align-items:center;gap:4px;justify-content:center;padding:6px 0}
+.step-dot{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:var(--line);
+  transition:all 0.3s ease;
+}
+.step-dot.active{background:var(--mint);width:20px;border-radius:4px}
+.step-dot.done{background:var(--mint);opacity:.5}
+
+/* ===== WAVE ANIMATION ===== */
+.wave{display:flex;align-items:flex-end;gap:3px;height:36px;justify-content:center}
+.wave-bar{
+  width:4px;border-radius:4px;
+  background:var(--mint);
+  animation:wave 1.1s ease-in-out infinite;
+}
+.wave-bar:nth-child(1){animation-delay:0s;height:12px}
+.wave-bar:nth-child(2){animation-delay:.15s;height:22px}
+.wave-bar:nth-child(3){animation-delay:.3s;height:32px}
+.wave-bar:nth-child(4){animation-delay:.45s;height:22px}
+.wave-bar:nth-child(5){animation-delay:.6s;height:14px}
+.wave-bar:nth-child(6){animation-delay:.75s;height:26px}
+.wave-bar:nth-child(7){animation-delay:.9s;height:18px}
+@keyframes wave{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+
+/* ===== SPINNER ===== */
+.spinner{
+  width:32px;height:32px;
+  border:3px solid var(--line);
+  border-top-color:var(--mint);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== LOADING OVERLAY ===== */
+.loading-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(4px);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity var(--transition);
+}
+.loading-overlay.show{opacity:1;pointer-events:auto}
+.loading-text{font-size:14px;font-weight:600;color:var(--sub)}
+
+/* ===== TOAST ===== */
+#toast{
+  position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--ink);color:var(--white);
+  padding:11px 18px;border-radius:100px;
+  font-size:13px;font-weight:600;
+  white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transition:all 0.3s ease;
+  z-index:200;
+  box-shadow:var(--shadow-md);
+  display:flex;align-items:center;gap:8px;max-width:340px;
+  text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast svg{width:16px;height:16px;flex-shrink:0}
+
+/* ===== MODAL ===== */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(20,35,45,.6);
+  backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;
+  transition:opacity var(--transition);
+  display:flex;align-items:flex-end;
+  padding:0;
+}
+.modal-backdrop.open{opacity:1;pointer-events:auto}
+.modal-sheet{
+  background:var(--white);
+  border-radius:var(--radius-xl) var(--radius-xl) 0 0;
+  width:100%;
+  max-height:85vh;
+  overflow-y:auto;
+  padding:8px 20px 32px;
+  transform:translateY(40px);
+  transition:transform var(--transition);
+}
+.modal-backdrop.open .modal-sheet{transform:translateY(0)}
+.modal-handle{
+  width:36px;height:4px;
+  background:var(--line);
+  border-radius:2px;
+  margin:12px auto 20px;
+}
+
+/* ===== MISC UTILITIES ===== */
+.p-screen{padding:20px}
+.p-screen-top{padding:20px 20px 0}
+.gap-4{display:flex;flex-direction:column;gap:4px}
+.gap-8{display:flex;flex-direction:column;gap:8px}
+.gap-12{display:flex;flex-direction:column;gap:12px}
+.gap-16{display:flex;flex-direction:column;gap:16px}
+.gap-20{display:flex;flex-direction:column;gap:20px}
+.row{display:flex;align-items:center;gap:10px}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.col-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.text-center{text-align:center}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}.mt-24{margin-top:24px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.ml-auto{margin-left:auto}
+.w-full{width:100%}
+.hidden{display:none!important}
+.opacity-50{opacity:.5}
+
+/* ===== HERO / SPLASH ===== */
+.hero-gradient{
+  background:linear-gradient(160deg,#E8F7F5 0%,#EDE8F5 50%,#F5EEE8 100%);
+  min-height:260px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 24px 32px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.hero-gradient::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 30%,rgba(155,123,184,.15) 0%,transparent 60%),
+             radial-gradient(circle at 20% 80%,rgba(91,168,162,.15) 0%,transparent 50%);
+}
+.hero-orb{
+  width:96px;height:96px;
+  border-radius:28px;
+  background:linear-gradient(135deg,var(--mint),var(--lilac));
+  display:grid;place-items:center;
+  color:var(--white);
+  box-shadow:0 8px 28px rgba(91,168,162,.35);
+  margin-bottom:20px;
+  position:relative;
+}
+.hero-orb svg{width:46px;height:46px}
+.hero-orb .orb-spark{
+  position:absolute;right:-8px;top:-6px;
+  width:24px;height:24px;
+  background:var(--lilac);
+  border-radius:50%;
+  display:grid;place-items:center;
+  color:var(--white);
+  box-shadow:0 2px 8px rgba(155,123,184,.4);
+}
+.hero-orb .orb-spark svg{width:13px;height:13px}
+
+/* ===== SKILL CARD ===== */
+.skill-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;
+  border-radius:100px;
+  font-size:12px;font-weight:700;
+  background:var(--white);
+  box-shadow:var(--shadow-sm);
+  color:var(--ink-2);
+  border:1.5px solid var(--line);
+}
+.skill-pill svg{width:14px;height:14px;color:var(--mint)}
+
+/* ===== INTERVIEW SCREEN ===== */
+.chat-bubble{
+  max-width:82%;
+  padding:11px 14px;
+  border-radius:16px;
+  font-size:13px;line-height:1.55;
+  margin-bottom:8px;
+}
+.chat-bubble.ai{
+  background:var(--canvas);
+  border:1px solid var(--line);
+  border-bottom-left-radius:4px;
+  align-self:flex-start;
+  color:var(--ink);
+}
+.chat-bubble.user{
+  background:var(--mint);
+  color:var(--white);
+  border-bottom-right-radius:4px;
+  align-self:flex-end;
+}
+.chat-wrap{
+  display:flex;flex-direction:column;
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  gap:4px;
+}
+.chat-wrap::-webkit-scrollbar{display:none}
+
+/* ===== PASSPORT CARD ===== */
+.passport-card{
+  background:linear-gradient(135deg,#1E3340 0%,#2A5065 100%);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  color:var(--white);
+  position:relative;
+  overflow:hidden;
+}
+.passport-card::after{
+  content:'';
+  position:absolute;right:-20px;top:-20px;
+  width:120px;height:120px;
+  border-radius:50%;
+  background:rgba(255,255,255,.05);
+}
+.passport-card::before{
+  content:'';
+  position:absolute;left:-10px;bottom:-30px;
+  width:90px;height:90px;
+  border-radius:50%;
+  background:rgba(91,168,162,.2);
+}
+
+/* ===== TIMELINE ===== */
+.timeline{display:flex;flex-direction:column;gap:0}
+.timeline-item{display:flex;gap:14px;padding-bottom:20px;position:relative}
+.timeline-item::before{
+  content:'';
+  position:absolute;
+  left:19px;top:32px;
+  width:2px;
+  bottom:0;
+  background:var(--line);
+}
+.timeline-item:last-child::before{display:none}
+.timeline-icon{
+  width:38px;height:38px;
+  border-radius:50%;
+  background:var(--canvas);
+  border:2px solid var(--line);
+  display:grid;place-items:center;
+  color:var(--sub);
+  flex-shrink:0;
+}
+.timeline-icon.done{background:var(--success-light);border-color:var(--success);color:var(--success)}
+.timeline-icon.active{background:var(--lilac-light);border-color:var(--lilac);color:var(--lilac)}
+.timeline-icon svg{width:16px;height:16px}
+
+/* ===== COURSE CARD ===== */
+.course-card{
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  transition:all var(--transition);
+}
+.course-card:hover{border-color:var(--mint);box-shadow:var(--shadow-sm)}
+.course-card-header{
+  padding:14px 16px 10px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.course-icon{
+  width:40px;height:40px;
+  border-radius:var(--radius-md);
+  background:var(--mint-light);
+  display:grid;place-items:center;
+  color:var(--mint-dark);
+  flex-shrink:0;
+}
+.course-icon svg{width:20px;height:20px}
+.course-card-footer{
+  background:var(--canvas);
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+/* ===== JOB CARD ===== */
+.job-card{
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  display:flex;flex-direction:column;gap:10px;
+  transition:all var(--transition);
+}
+.job-card:hover{border-color:var(--mint);box-shadow:var(--shadow-sm)}
+.job-org{
+  width:40px;height:40px;
+  border-radius:var(--radius-md);
+  display:grid;place-items:center;
+  font-weight:800;font-size:14px;
+  flex-shrink:0;
+}
+
+/* ===== DEMO RIBBON ===== */
+.demo-ribbon{
+  display:flex;align-items:center;gap:8px;
+  background:var(--warning-light);
+  border:1px solid rgba(201,125,48,.2);
+  border-radius:var(--radius-sm);
+  padding:9px 12px;
+  font-size:11px;font-weight:700;
+  color:var(--warning);
+}
+.demo-ribbon svg{width:14px;height:14px;flex-shrink:0}
+
+/* ===== SCORE BAR ===== */
+.score-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width 0.8s ease}
+
+/* ===== CHECKBOX ===== */
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.custom-checkbox{
+  width:20px;height:20px;
+  border:2px solid var(--line);
+  border-radius:5px;
+  display:grid;place-items:center;
+  flex-shrink:0;
+  margin-top:1px;
+  transition:all var(--transition);
+}
+.checkbox-row input[type=checkbox]{display:none}
+.checkbox-row input:checked+.custom-checkbox{background:var(--mint);border-color:var(--mint)}
+.checkbox-row input:checked+.custom-checkbox svg{opacity:1}
+.custom-checkbox svg{width:12px;height:12px;color:var(--white);opacity:0;transition:opacity var(--transition)}
+
+/* ===== RADIO ===== */
+.radio-group{display:flex;flex-direction:column;gap:10px}
+.radio-card{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-md);
+  cursor:pointer;
+  transition:all var(--transition);
+}
+.radio-card:hover{border-color:var(--mint)}
+.radio-card.selected{border-color:var(--mint);background:var(--mint-light)}
+.radio-dot{
+  width:18px;height:18px;
+  border:2px solid var(--line);
+  border-radius:50%;
+  display:grid;place-items:center;
+  flex-shrink:0;
+  transition:all var(--transition);
+}
+.radio-card.selected .radio-dot{border-color:var(--mint)}
+.radio-dot::after{
+  content:'';
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--mint);
+  transform:scale(0);
+  transition:transform var(--transition);
+}
+.radio-card.selected .radio-dot::after{transform:scale(1)}
+
+/* ===== DAYS SELECTOR ===== */
+.days-selector{display:flex;gap:6px}
+.day-btn{
+  flex:1;height:38px;
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-sm);
+  font-size:11px;font-weight:700;
+  color:var(--sub);
+  transition:all var(--transition);
+  background:var(--white);
+}
+.day-btn.selected{background:var(--mint);border-color:var(--mint);color:var(--white)}
+
+/* ===== RANGE SLIDER ===== */
+.range-wrap{position:relative;padding:4px 0}
+input[type=range]{
+  width:100%;
+  -webkit-appearance:none;
+  height:4px;background:var(--line);border-radius:2px;outline:none;
+  transition:background var(--transition);
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:22px;height:22px;
+  border-radius:50%;
+  background:var(--mint);
+  box-shadow:0 2px 8px rgba(91,168,162,.35);
+  cursor:pointer;
+  border:3px solid var(--white);
+}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;
+  border-radius:50%;
+  background:var(--mint);
+  border:3px solid var(--white);
+  cursor:pointer;
+}
+
+/* ===== STAT CARD ===== */
+.stat-card{
+  background:var(--canvas);
+  border-radius:var(--radius-md);
+  padding:14px 10px;
+  text-align:center;
+}
+.stat-card .stat-value{font-size:22px;font-weight:800;color:var(--mint-dark);display:block;letter-spacing:-1px}
+.stat-card .stat-label{font-size:10px;color:var(--sub);font-weight:600;margin-top:2px;line-height:1.3}
+
+/* ===== FEEDBACK ===== */
+.ai-thinking{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  background:var(--canvas);
+  border-radius:12px;
+  border-bottom-left-radius:4px;
+  max-width:120px;
+  color:var(--sub);
+  font-size:12px;
+}
+.dot-pulse{display:flex;gap:3px;align-items:center}
+.dot-pulse span{
+  width:6px;height:6px;
+  background:var(--sub);border-radius:50%;
+  animation:pulse 1.3s ease-in-out infinite;
+}
+.dot-pulse span:nth-child(2){animation-delay:.2s}
+.dot-pulse span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+/* ===== FOCUS VISIBLE ===== */
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid var(--mint);
+  outline-offset:3px;
+}
+
+/* ===== REDUCED MOTION ===== */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* ===== SPLASH SCREEN ===== */
+#splash{
+  position:fixed;inset:0;z-index:300;
+  background:linear-gradient(160deg,#E8F7F5 0%,#EDE8F5 60%,#F5EEE8 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  transition:opacity .5s ease, transform .5s ease;
+}
+#splash.hide{opacity:0;pointer-events:none;transform:scale(1.05)}
+.splash-brand{text-align:center}
+.splash-icon{
+  width:110px;height:110px;
+  border-radius:28px;
+  overflow:hidden;
+  margin:0 auto 16px;
+  box-shadow:0 12px 32px rgba(91,168,162,.35);
+  position:relative;
+}
+.splash-icon img{width:100%;height:100%;object-fit:cover;display:block}
+.splash-name{font-size:32px;font-weight:800;letter-spacing:-1.5px;color:var(--ink)}
+.splash-sub{font-size:14px;color:var(--sub);margin-top:4px}
+.splash-progress{
+  width:160px;height:3px;
+  background:rgba(91,168,162,.2);
+  border-radius:2px;overflow:hidden;
+}
+.splash-progress-bar{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--mint),var(--lilac));
+  border-radius:2px;
+  animation:splash-load 1.8s ease forwards;
+}
+@keyframes splash-load{0%{width:0}100%{width:100%}}
+
+/* ===== RESET BUTTON ===== */
+#reset-btn{
+  position:fixed;bottom:calc(var(--nav-h) + 14px);right:12px;
+  width:40px;height:40px;
+  background:var(--ink);color:var(--white);
+  border-radius:50%;
+  display:grid;place-items:center;
+  box-shadow:var(--shadow-md);
+  z-index:40;
+  opacity:.7;
+  transition:opacity var(--transition);
+}
+#reset-btn:hover{opacity:1}
+#reset-btn svg{width:17px;height:17px}
+#reset-btn.hidden{display:none}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-brand">
+    <div class="splash-icon" style="background:none;box-shadow:none;width:110px;height:110px;border-radius:28px;overflow:hidden">
+      <img src="icono-libro.png" alt="CuidalIA" style="width:100%;height:100%;object-fit:cover;border-radius:28px">
+    </div>
+    <div class="splash-name">CuidalIA</div>
+    <div class="splash-sub">Tu experiencia vale</div>
+  </div>
+  <div class="splash-progress"><div class="splash-progress-bar"></div></div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app">
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Procesando…</div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- RESET -->
+  <button id="reset-btn" class="hidden" title="Reiniciar demo" onclick="resetApp()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+  </button>
+
+  <!-- ========================= SCREEN 01: BIENVENIDA ========================= -->
+  <div class="screen active" id="s-bienvenida">
+    <div class="screen-body">
+
+      <!-- Hero con imagen real de la app -->
+      <div style="background:linear-gradient(180deg,#5BA8A2 0%,#4A9490 100%);padding:40px 24px 0;text-align:center;position:relative;overflow:hidden">
+        <!-- Círculos decorativos de fondo -->
+        <div style="position:absolute;top:-60px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)"></div>
+        <div style="position:absolute;top:20px;left:-40px;width:130px;height:130px;border-radius:50%;background:rgba(155,123,184,.15)"></div>
+
+        <!-- Logo + nombre de la app -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;position:relative;z-index:1">
+          <div style="width:38px;height:38px;border-radius:11px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.2);flex-shrink:0">
+            <img src="icono-libro.png" alt="CuidalIA icono" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.6px">CuidalIA</span>
+        </div>
+
+        <!-- Imagen principal -->
+        <div style="position:relative;z-index:1;margin:0 -8px">
+          <img src="imagen-inicio.png"
+               alt="Mujer cuidadora descubriendo su potencial profesional con educación, trabajo y tecnología"
+               style="width:88%;max-width:320px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 12px 32px rgba(0,0,0,.25))">
+        </div>
+      </div>
+
+      <!-- Contenido inferior -->
+      <div style="padding:28px 24px 0">
+        <h1 style="font-size:23px;font-weight:800;letter-spacing:-.6px;line-height:1.2;color:var(--ink);margin-bottom:10px;text-align:center">
+          El arte de cuidar,<br>elevado a oportunidad
+        </h1>
+        <p style="font-size:14px;line-height:1.6;color:var(--sub);text-align:center;max-width:300px;margin:0 auto 20px">
+          CuidalIA reconoce las habilidades que desarrollaste cuidando y te ayuda a construir tu siguiente paso profesional.
+        </p>
+
+        <!-- Pills de propuesta de valor -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px">
+          <span class="skill-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6h4l5 4V5L7 9H3ZM16 9a5 5 0 0 1 0 6"/></svg>
+            Entrevista por voz
+          </span>
+          <span class="skill-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 2-7 2-3 7-3-7-7-2 7-2 3-7Z"/></svg>
+            Traduce habilidades
+          </span>
+          <span class="skill-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6Z"/></svg>
+            Pasaporte de Talento
+          </span>
+        </div>
+
+        <div class="notice notice-info" style="margin-bottom:16px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg>
+          <span>No necesitas currículum. Solo tu historia y las ganas de seguir adelante.</span>
+        </div>
+        <button class="btn btn-primary" onclick="goTo('s-registro')">
+          Comenzar ahora
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+    
+      </div>
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:20px 20px 24px;border-radius:var(--radius-md);overflow:hidden">
+        <div style="background:var(--white);padding:14px 10px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--mint-dark)">5K+</div>
+          <div style="font-size:10px;color:var(--sub);font-weight:600">Mujeres apoyadas</div>
+        </div>
+        <div style="background:var(--white);padding:14px 10px;text-align:center;border-left:1px solid var(--line);border-right:1px solid var(--line)">
+          <div style="font-size:20px;font-weight:800;color:var(--mint-dark)">92%</div>
+          <div style="font-size:10px;color:var(--sub);font-weight:600">Validan habilidades</div>
+        </div>
+        <div style="background:var(--white);padding:14px 10px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--mint-dark)">340+</div>
+          <div style="font-size:10px;color:var(--sub);font-weight:600">Empleos conectados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 02: REGISTRO ========================= -->
+  <div class="screen" id="s-registro">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <span class="topbar-title">Crear cuenta</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:5%"></div></div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">Paso 1 de 8</div>
+        <h2 class="display-sm mb-8">Comencemos por conocerte</h2>
+        <p class="lead mb-20">Solo necesitamos algunos datos básicos para guardar tus avances.</p>
+        <div class="gap-14" id="form-registro" style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <label class="label" for="r-nombre">¿Cómo te llamas? *</label>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></svg>
+              <input class="input" id="r-nombre" type="text" placeholder="María López" autocomplete="name">
+            </div>
+            <span class="field-error" id="err-nombre">Por favor ingresa tu nombre.</span>
+          </div>
+          <div class="form-group">
+            <label class="label" for="r-email">Correo electrónico *</label>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m2 8 10 7 10-7"/></svg>
+              <input class="input" id="r-email" type="email" placeholder="maria@ejemplo.com" autocomplete="email">
+            </div>
+            <span class="field-error" id="err-email">Ingresa un correo válido.</span>
+          </div>
+          <div class="form-group">
+            <label class="label" for="r-password">Contraseña *</label>
+            <div class="input-icon-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input class="input" id="r-password" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+            </div>
+            <span class="field-error" id="err-pass">La contraseña debe tener al menos 6 caracteres.</span>
+          </div>
+          <div class="notice notice-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Tu historia es privada. El micrófono solo se activará con tu permiso explícito.</span>
+          </div>
+          <label class="checkbox-row" for="r-terms">
+            <input type="checkbox" id="r-terms">
+            <span class="custom-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-9"/></svg></span>
+            <span class="body-text">Entiendo cómo se usan mis datos y acepto los <span style="color:var(--mint-dark);font-weight:600">Términos de uso</span>.</span>
+          </label>
+          <span class="field-error" id="err-terms">Debes aceptar los términos para continuar.</span>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="submitRegistro()">
+          Crear mi cuenta
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <p class="caption text-center mt-12">¿Ya tienes cuenta? <button onclick="loadDemo()" style="color:var(--mint-dark);font-weight:700;font-size:11px">Iniciar sesión</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 03: BIENVENIDA PERSONALIZADA ========================= -->
+  <div class="screen" id="s-bienvenida-personal">
+    <div class="screen-body">
+      <div style="background:linear-gradient(160deg,#E8F7F5,#EDE8F5);padding:48px 24px 36px;text-align:center">
+        <div class="avatar" style="width:72px;height:72px;font-size:26px;margin:0 auto 20px" id="welcome-avatar">M</div>
+        <div class="eyebrow mb-8">¡Bienvenida de vuelta!</div>
+        <h2 class="display-sm mb-12" id="welcome-name">¡Hola, María!</h2>
+        <p class="lead" style="max-width:280px;margin:0 auto">Estás a punto de descubrir todo lo que tu experiencia tiene para ofrecer.</p>
+      </div>
+      <div style="padding:24px 20px">
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+          <div class="row" style="gap:14px;padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--mint-light);display:grid;place-items:center;color:var(--mint-dark);flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)">Entrevista guiada por IA</div>
+              <div style="font-size:11px;color:var(--sub)">Cuéntanos tu historia con tu propia voz</div>
+            </div>
+          </div>
+          <div class="row" style="gap:14px;padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--lilac-light);display:grid;place-items:center;color:var(--lilac);flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 2-7 2-3 7-3-7-7-2 7-2 3-7Z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)">Traductor de habilidades</div>
+              <div style="font-size:11px;color:var(--sub)">Transforma tu experiencia en competencias reconocidas</div>
+            </div>
+          </div>
+          <div class="row" style="gap:14px;padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--olive-light);display:grid;place-items:center;color:var(--olive);flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 13h18"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)">Pasaporte de Talento</div>
+              <div style="font-size:11px;color:var(--sub)">Tu perfil profesional listo para compartir</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="goTo('s-disponibilidad-previa')">
+          Comenzar mi perfil
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 04: PREPARACIÓN ENTREVISTA ========================= -->
+  <div class="screen" id="s-prep-entrevista">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Entrevista</span>
+      <span class="badge badge-mint" style="margin-left:auto">Paso 2</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+    <div class="screen-body">
+      <div style="padding:28px 20px 0;text-align:center">
+        <div style="width:88px;height:88px;background:linear-gradient(135deg,var(--mint),var(--lilac));border-radius:50%;display:grid;place-items:center;color:var(--white);margin:0 auto 20px;box-shadow:0 0 0 14px rgba(91,168,162,.12)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg>
+        </div>
+        <h2 class="display-sm mb-10">¿Platicamos un momento?</h2>
+        <p class="lead mb-20">Nuestra guía de IA te hará preguntas sencillas sobre tu experiencia. Sin juicios, sin presión.</p>
+      </div>
+      <div style="padding:0 20px">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+          <div class="row" style="padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-md);gap:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9v6h4l5 4V5L7 9H3ZM16 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg>
+            <div>
+              <div style="font-size:13px;font-weight:700">Habla y escucha preguntas</div>
+              <div style="font-size:11px;color:var(--sub)">La IA te guía con voz simulada</div>
+            </div>
+          </div>
+          <div class="row" style="padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-md);gap:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10Z"/></svg>
+            <div>
+              <div style="font-size:13px;font-weight:700">Pausa cuando quieras</div>
+              <div style="font-size:11px;color:var(--sub)">Tú controlas el ritmo</div>
+            </div>
+          </div>
+          <div class="row" style="padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-md);gap:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M5 9h.1M9 9h.1M13 9h.1M17 9h.1M5 12h.1M9 12h.1M13 12h.1M17 12h.1M7 16h10"/></svg>
+            <div>
+              <div style="font-size:13px;font-weight:700">También puedes escribir</div>
+              <div style="font-size:11px;color:var(--sub)">Si prefieres texto está bien</div>
+            </div>
+          </div>
+        </div>
+        <div class="notice notice-info mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>No necesitas encender tu cámara. Esta es una simulación para validación UX.</span>
+        </div>
+        <button class="btn btn-primary mb-8" onclick="goTo('s-entrevista')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg>
+          Iniciar por voz
+        </button>
+        <button class="btn btn-ghost" onclick="goTo('s-entrevista')">Escribir mis respuestas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 05: ENTREVISTA EN VIVO ========================= -->
+  <div class="screen" id="s-entrevista" style="display:flex;flex-direction:column">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Entrevista en vivo</span>
+      <span class="badge badge-lilac" id="interview-progress-badge">1/5</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="interview-progress-bar" style="width:25%"></div></div>
+    <div class="chat-wrap" id="chat-wrap"></div>
+    <div style="flex-shrink:0">
+      <div id="interview-options" style="padding:0 16px 10px;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="padding:0 16px 16px;display:flex;gap:8px;align-items:center">
+        <input class="input" id="chat-input" type="text" placeholder="Escribe tu respuesta…" style="flex:1;border-radius:100px;padding:11px 16px">
+        <button class="btn btn-primary btn-icon" id="chat-send" onclick="sendChatMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 06: REVISIÓN EXPERIENCIAS ========================= -->
+  <div class="screen" id="s-revision">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Tu historia</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:38%"></div></div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">Revisión</div>
+        <h2 class="display-sm mb-8">Esto es lo que encontramos</h2>
+        <p class="lead mb-20">Basándonos en lo que contaste, identificamos estas experiencias clave. ¿Todo correcto?</p>
+        <div style="display:flex;flex-direction:column;gap:12px" id="experiencias-list"></div>
+        <div class="notice notice-lilac mt-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 2-7 2-3 7-3-7-7-2 7-2 3-7Z"/></svg>
+          <span>¡Tus experiencias de cuidado cuentan igual que cualquier trabajo formal!</span>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="goTo('s-traductor')">
+          Continuar al Traductor de Habilidades
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost mt-8" onclick="goBack()">Editar respuestas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 07: TRADUCTOR DE HABILIDADES ========================= -->
+  <div class="screen" id="s-traductor">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Traductor de Habilidades</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:52%"></div></div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0;text-align:center">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--mint-light),var(--lilac-light));margin-bottom:16px;position:relative">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--mint-dark)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg>
+          <span style="position:absolute;right:-6px;top:-5px;width:20px;height:20px;background:var(--lilac);border-radius:50%;display:grid;place-items:center;color:white">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Z"/></svg>
+          </span>
+        </div>
+        <h2 class="display-sm mb-8">Traduciendo tu experiencia</h2>
+        <p class="lead mb-0" style="max-width:280px;margin:0 auto 20px">La IA está convirtiendo tu historia en habilidades formales reconocidas por el sector laboral.</p>
+        <div id="translator-state">
+          <div style="padding:24px 0" id="translator-loading">
+            <div class="wave" style="margin-bottom:12px">
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            </div>
+            <div class="caption">Analizando tus respuestas…</div>
+          </div>
+          <div id="translator-results" class="hidden" style="text-align:left"></div>
+        </div>
+      </div>
+      <div style="padding:0 20px 20px" id="translator-actions" class="hidden">
+        <button class="btn btn-primary" onclick="goTo('s-validacion')">
+          Ver mi perfil de habilidades
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 08: VALIDACIÓN ========================= -->
+  <div class="screen" id="s-validacion">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Validación de habilidades</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:64%"></div></div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">Paso 4 de 8</div>
+        <h2 class="display-sm mb-8">Confirma tus fortalezas</h2>
+        <p class="lead mb-20">Selecciona las habilidades que sientes que realmente dominas. Puedes elegir varias.</p>
+        <div style="display:flex;flex-direction:column;gap:10px" id="skills-validate-list"></div>
+      </div>
+      <div style="padding:20px">
+        <div class="notice notice-info mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg>
+          <span>Cuantas más habilidades selecciones, más completo será tu Pasaporte de Talento.</span>
+        </div>
+        <button class="btn btn-primary" id="btn-validar" onclick="submitValidacion()" disabled>
+          Generar mi Pasaporte
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 09: PASAPORTE DE TALENTO ========================= -->
+  <div class="screen" id="s-pasaporte">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Pasaporte de Talento</span>
+      <button class="topbar-action" onclick="sharePassport()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+      </button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div>
+    <div class="screen-body">
+      <div style="padding:20px">
+        <!-- Passport Card -->
+        <div class="passport-card mb-16">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;position:relative;z-index:1">
+            <div class="avatar" id="passport-avatar" style="background:linear-gradient(135deg,var(--mint),var(--lilac))">M</div>
+            <div>
+              <div style="font-size:17px;font-weight:800;letter-spacing:-.3px" id="passport-name">María López</div>
+              <div style="font-size:11px;opacity:.7;margin-top:2px">Pasaporte de Talento · CuidalIA</div>
+            </div>
+            <svg style="margin-left:auto;opacity:.6" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 2-7 2-3 7-3-7-7-2 7-2 3-7Z"/></svg>
+          </div>
+          <div style="height:1px;background:rgba(255,255,255,.15);margin-bottom:14px;position:relative;z-index:1"></div>
+          <div style="display:flex;flex-direction:column;gap:8px;position:relative;z-index:1" id="passport-skills-list"></div>
+          <div style="height:1px;background:rgba(255,255,255,.15);margin:14px 0;position:relative;z-index:1"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;opacity:.6;position:relative;z-index:1">
+            <span>Emitido: <span id="passport-date"></span></span>
+            <span class="badge" style="background:rgba(255,255,255,.15);color:white">Verificado ✓</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="col-2 mb-16" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><span class="stat-value" id="passport-skills-count">8</span><div class="stat-label">Habilidades validadas</div></div>
+          <div class="stat-card"><span class="stat-value" id="passport-exp-years">12</span><div class="stat-label">Años de experiencia</div></div>
+          <div class="stat-card"><span class="stat-value">A+</span><div class="stat-label">Nivel de perfil</div></div>
+        </div>
+
+        <div class="notice notice-success mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <span><strong>¡Tu Pasaporte está listo!</strong> Ahora puedes explorar oportunidades y rutas de aprendizaje.</span>
+        </div>
+
+        <button class="btn btn-primary mb-8" onclick="unlockNav(); goTo('s-disponibilidad')">
+          Explorar mis oportunidades
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost" onclick="sharePassport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+          Compartir mi Pasaporte
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= SCREEN 10: DISPONIBILIDAD ========================= -->
+  <div class="screen" id="s-disponibilidad">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Mi disponibilidad</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">Personalización</div>
+        <h2 class="display-sm mb-8">Tu tiempo también importa</h2>
+        <p class="lead mb-20">Cuéntanos cuándo y dónde estás disponible para que las oportunidades se adapten a ti.</p>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="form-group">
+            <label class="label">¿En qué zona te encuentras?</label>
+            <select class="input" id="d-zona">
+              <option value="">Selecciona tu alcaldía…</option>
+              <option value="Iztapalapa">Iztapalapa</option>
+              <option value="Gustavo A. Madero">Gustavo A. Madero</option>
+              <option value="Álvaro Obregón">Álvaro Obregón</option>
+              <option value="Tlalpan">Tlalpan</option>
+              <option value="Xochimilco">Xochimilco</option>
+              <option value="Coyoacán">Coyoacán</option>
+              <option value="Azcapotzalco">Azcapotzalco</option>
+              <option value="Benito Juárez">Benito Juárez</option>
+              <option value="Cuauhtémoc">Cuauhtémoc</option>
+              <option value="Miguel Hidalgo">Miguel Hidalgo</option>
+              <option value="Otra">Otra alcaldía</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Horas disponibles al día</label>
+            <div style="padding:4px 0">
+              <input type="range" id="d-horas" min="1" max="8" value="4" oninput="document.getElementById('d-horas-val').textContent=this.value+' horas'">
+              <div class="row-between mt-8">
+                <span class="caption">1 hora</span>
+                <strong style="font-size:14px;color:var(--mint-dark)" id="d-horas-val">4 horas</span>
+                <span class="caption">8 horas</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Días disponibles</label>
+            <div class="days-selector" id="days-selector">
+              <button type="button" class="day-btn selected" data-day="L">L</button>
+              <button type="button" class="day-btn selected" data-day="M">M</button>
+              <button type="button" class="day-btn selected" data-day="Mi">Mi</button>
+              <button type="button" class="day-btn selected" data-day="J">J</button>
+              <button type="button" class="day-btn selected" data-day="V">V</button>
+              <button type="button" class="day-btn" data-day="S">S</button>
+              <button type="button" class="day-btn" data-day="D">D</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Modalidad preferida</label>
+            <div class="radio-group">
+              <label class="radio-card selected" id="modal-presencial" onclick="selectModal(this)">
+                <div class="radio-dot"></div>
+                <div>
+                  <div style="font-size:13px;font-weight:700">Presencial</div>
+                  <div style="font-size:11px;color:var(--sub)">Trabajo en persona cerca de mi zona</div>
+                </div>
+              </label>
+              <label class="radio-card" id="modal-hibrido" onclick="selectModal(this)">
+                <div class="radio-dot"></div>
+                <div>
+                  <div style="font-size:13px;font-weight:700">Híbrido</div>
+                  <div style="font-size:11px;color:var(--sub)">Combino presencial y remoto</div>
+                </div>
+              </label>
+              <label class="radio-card" id="modal-remoto" onclick="selectModal(this)">
+                <div class="radio-dot"></div>
+                <div>
+                  <div style="font-size:13px;font-weight:700">Remoto</div>
+                  <div style="font-size:11px;color:var(--sub)">Prefiero trabajar desde casa</div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="notice notice-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg>
+            <span>Puedes actualizar esta información en cualquier momento desde tu perfil.</span>
+          </div>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="saveDisponibilidad()">
+          Guardar y continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="bottom-nav" class="hidden"></div>
+  </div>
+
+  <!-- ========================= SCREEN 11: ORIENTACIÓN PROFESIONAL ========================= -->
+  <div class="screen" id="s-orientacion">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Orientación</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">¿Qué quieres explorar?</div>
+        <h2 class="display-sm mb-8">¿Hacia dónde quieres ir?</h2>
+        <p class="lead mb-20">Elige las áreas que te interesan. Puedes seleccionar más de una.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="intereses-grid"></div>
+        <div class="notice notice-lilac mt-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 2-7 2-3 7-3-7-7-2 7-2 3-7Z"/></svg>
+          <span>Tus habilidades de cuidado te dan ventaja real en estas áreas.</span>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" id="btn-orientacion" onclick="saveOrientacion()" disabled>
+          Continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="bottom-nav-orientacion"></div>
+  </div>
+
+  <!-- ========================= SCREEN 12: OBJETIVO CUIDADO INFANTIL ========================= -->
+  <div class="screen" id="s-objetivo">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Mi objetivo</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0;text-align:center">
+        <div style="background:var(--mint-light);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px">
+          <div style="font-size:48px;margin-bottom:10px">👶</div>
+          <h3 style="font-size:18px;font-weight:800;color:var(--mint-dark);margin-bottom:6px">Cuidado y Desarrollo Infantil</h3>
+          <p class="lead">Tu experiencia de cuidado familiar te da una base sólida para trabajar en este sector.</p>
+        </div>
+        <div style="text-align:left;display:flex;flex-direction:column;gap:14px">
+          <h3 style="font-size:15px;font-weight:700">¿Qué tipo de rol te interesa?</h3>
+          <div style="display:flex;flex-direction:column;gap:8px" id="roles-list"></div>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" id="btn-objetivo" onclick="saveObjetivo()" disabled>
+          Ver mis fortalezas y brechas
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="bottom-nav-objetivo"></div>
+  </div>
+
+  <!-- ========================= SCREEN 13: FORTALEZAS Y BRECHAS ========================= -->
+  <div class="screen" id="s-fortalezas">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Fortalezas y brechas</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">Análisis de perfil</div>
+        <h2 class="display-sm mb-8">Lo que tienes y lo que puedes desarrollar</h2>
+        <p class="lead mb-20">Con base en tu Pasaporte de Talento y tu objetivo, este es tu diagnóstico.</p>
+
+        <h3 style="font-size:13px;font-weight:700;color:var(--success);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Tus fortalezas
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px" id="fortalezas-list"></div>
+
+        <h3 style="font-size:13px;font-weight:700;color:var(--warning);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+          Áreas de oportunidad
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px" id="brechas-list"></div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="goTo('s-cursos')">
+          Ver cursos recomendados
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost mt-8" onclick="goTo('s-oportunidades')">Saltar a oportunidades</button>
+      </div>
+    </div>
+    <div id="bottom-nav-fortalezas"></div>
+  </div>
+
+  <!-- ========================= SCREEN 14: CURSOS RECOMENDADOS ========================= -->
+  <div class="screen" id="s-cursos">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Cursos recomendados</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:20px 20px 0">
+        <div class="eyebrow mb-4">Formación</div>
+        <h2 class="display-sm mb-8">Rutas para crecer</h2>
+        <p class="lead mb-16">Seleccionamos estos cursos según tus brechas y tu objetivo. Algunos incluyen opción de certificación.</p>
+        <div class="notice notice-warn mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+          <span>Los cursos son informativos. La certificación depende de los requisitos de cada institución.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px" id="cursos-list"></div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="goTo('s-capacitacion')">
+          Elegir mi ruta de formación
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost mt-8" onclick="goTo('s-oportunidades')">En otro momento</button>
+      </div>
+    </div>
+    <div id="bottom-nav-cursos"></div>
+  </div>
+
+  <!-- ========================= SCREEN 15: CAPACITACIÓN ========================= -->
+  <div class="screen" id="s-capacitacion">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">¿Deseas capacitarte?</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">🎓</div>
+        <h2 class="display-sm mb-8">¿Quieres capacitarte ahora?</h2>
+        <p class="lead mb-24" style="max-width:280px;margin:0 auto 24px">Tienes dos opciones: empezar tu ruta de aprendizaje o explorar oportunidades de trabajo directamente.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;text-align:left">
+          <button class="card card-selectable row" id="cap-ruta" style="gap:14px;text-align:left" onclick="selectCapacitacion('ruta')">
+            <div style="width:44px;height:44px;border-radius:var(--radius-md);background:var(--mint-light);display:grid;place-items:center;color:var(--mint-dark);flex-shrink:0">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700;margin-bottom:3px">Mi ruta de aprendizaje</div>
+              <div class="caption">Construyo un plan personalizado de cursos y certificaciones</div>
+            </div>
+            <div class="card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-9"/></svg></div>
+          </button>
+          <button class="card card-selectable row" id="cap-ahora" style="gap:14px;text-align:left" onclick="selectCapacitacion('ahora')">
+            <div style="width:44px;height:44px;border-radius:var(--radius-md);background:var(--clay-light);display:grid;place-items:center;color:var(--clay);flex-shrink:0">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 13h18"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700;margin-bottom:3px">Ver oportunidades ahora</div>
+              <div class="caption">Explorar vacantes con mi perfil actual</div>
+            </div>
+            <div class="card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-9"/></svg></div>
+          </button>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" id="btn-capacitacion" onclick="submitCapacitacion()" disabled>
+          Continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="bottom-nav-cap"></div>
+  </div>
+
+  <!-- ========================= SCREEN 16: MI RUTA DE APRENDIZAJE ========================= -->
+  <div class="screen" id="s-ruta">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Mi ruta de aprendizaje</span>
+      <button class="topbar-action">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      </button>
+    </div>
+    <div class="screen-body">
+      <div style="padding:20px 20px 0">
+        <div style="background:linear-gradient(135deg,var(--mint-light),var(--lilac-light));border-radius:var(--radius-lg);padding:18px;margin-bottom:20px;display:flex;gap:14px;align-items:center">
+          <div style="width:50px;height:50px;border-radius:var(--radius-md);background:var(--white);display:grid;place-items:center;flex-shrink:0;box-shadow:var(--shadow-sm)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--mint-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink)">Plan personalizado</div>
+            <div class="caption" id="ruta-summary">3 módulos · ~6 semanas</div>
+          </div>
+        </div>
+        <div class="timeline" id="ruta-timeline"></div>
+      
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-secondary mb-8" onclick="goTo('s-cursos')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Ver cursos disponibles
+        </button>
+        <button class="btn btn-primary" onclick="goTo('s-oportunidades')">
+          Ver oportunidades laborales
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="bottom-nav-ruta"></div>
+  </div>
+
+  <!-- ========================= SCREEN 17: OPORTUNIDADES ========================= -->
+  <div class="screen" id="s-oportunidades">
+    <div class="topbar" style="border-bottom:none">
+      <span class="topbar-title" style="font-size:17px;font-weight:800">Oportunidades</span>
+      <button class="topbar-action" onclick="showFilterModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+      </button>
+    </div>
+    <div class="screen-body">
+      <div style="padding:0 20px 8px">
+     
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none" id="job-filters">
+          <button class="chip selected" onclick="filterJobs('all',this)">Todas</button>
+          <button class="chip" onclick="filterJobs('cuidado',this)">Cuidado infantil</button>
+          <button class="chip" onclick="filterJobs('educacion',this)">Educación</button>
+          <button class="chip" onclick="filterJobs('salud',this)">Salud</button>
+          <button class="chip" onclick="filterJobs('social',this)">Social</button>
+        </div>
+      </div>
+      <div style="padding:0 20px 20px">
+        <div style="display:flex;flex-direction:column;gap:12px" id="jobs-list"></div>
+      </div>
+    </div>
+    <div id="main-bottom-nav"></div>
+  </div>
+
+  <!-- ========================= SCREEN 18: POSTULACIÓN ========================= -->
+  <div class="screen" id="s-postulacion">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Postulación</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:20px 20px 0" id="postulacion-content"></div>
+      <div style="padding:20px">
+        <div class="demo-ribbon mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+          <span>Demostración · Esta postulación no envía información real.</span>
+        </div>
+        <button class="btn btn-primary" onclick="submitPostulacion()">
+          Enviar mi postulación
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost mt-8" onclick="goBack()">Revisar antes de enviar</button>
+      </div>
+    </div>
+    <div id="bottom-nav-post"></div>
+  </div>
+
+  <!-- ========================= SCREEN 19: SEGUIMIENTO ========================= -->
+  <div class="screen" id="s-seguimiento">
+    <div class="topbar" style="border-bottom:none">
+      <span class="topbar-title" style="font-size:17px;font-weight:800">Mi seguimiento</span>
+    </div>
+    <div class="screen-body">
+      <div style="padding:20px 20px 0">
+        <div style="text-align:center;padding:20px 0 24px">
+          <div style="width:80px;height:80px;background:var(--success-light);border-radius:50%;display:grid;place-items:center;margin:0 auto 16px">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          </div>
+          <h2 class="display-sm mb-8">¡Postulación enviada!</h2>
+          <p class="lead" style="max-width:260px;margin:0 auto">Te notificaremos cuando el empleador responda. Mientras tanto, puedes seguir explorando.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px" id="seguimiento-list"></div>
+        <div class="demo-ribbon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+          <span>Demostración · El seguimiento y las notificaciones son simulados.</span>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="navTo('oportunidades')">
+          Explorar más oportunidades
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost mt-8" onclick="navTo('perfil')">Ver mi perfil</button>
+      </div>
+    </div>
+    <div id="bottom-nav-seg"></div>
+  </div>
+
+  <!-- ========================= SCREEN: MI PERFIL ========================= -->
+  <div class="screen" id="s-perfil">
+    <div class="topbar" style="border-bottom:none">
+      <span class="topbar-title" style="font-size:17px;font-weight:800">Mi perfil</span>
+      <button class="topbar-action" onclick="editPerfil()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+      </button>
+    </div>
+    <div class="screen-body">
+      <div style="padding:20px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div class="avatar" style="width:72px;height:72px;font-size:26px;margin:0 auto 12px" id="perfil-avatar">M</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-.3px" id="perfil-name">María López</div>
+          <div class="caption mt-4" id="perfil-email">maria@ejemplo.com</div>
+          <div class="badge badge-mint mt-8">Perfil completo</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+          <div class="row-between" style="padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div class="row" style="gap:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6Z"/></svg>
+              <span style="font-size:13px;font-weight:600">Pasaporte de Talento</span>
+            </div>
+            <button onclick="goTo('s-pasaporte')" style="font-size:12px;color:var(--mint-dark);font-weight:700">Ver →</button>
+          </div>
+          <div class="row-between" style="padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div class="row" style="gap:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18"/></svg>
+              <span style="font-size:13px;font-weight:600">Mi disponibilidad</span>
+            </div>
+            <button onclick="goTo('s-disponibilidad')" style="font-size:12px;color:var(--mint-dark);font-weight:700">Editar →</button>
+          </div>
+          <div class="row-between" style="padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div class="row" style="gap:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              <span style="font-size:13px;font-weight:600">Mi ruta de aprendizaje</span>
+            </div>
+            <button onclick="goTo('s-ruta')" style="font-size:12px;color:var(--mint-dark);font-weight:700">Ver →</button>
+          </div>
+          <div class="row-between" style="padding:14px;background:var(--canvas);border-radius:var(--radius-md)">
+            <div class="row" style="gap:10px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 13h18"/></svg>
+              <span style="font-size:13px;font-weight:600">Postulaciones</span>
+            </div>
+            <button onclick="goTo('s-seguimiento')" style="font-size:12px;color:var(--mint-dark);font-weight:700">Ver →</button>
+          </div>
+        </div>
+
+        <div class="divider mb-16"></div>
+        <button class="btn btn-danger" onclick="confirmReset()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reiniciar demostración
+        </button>
+      </div>
+    </div>
+    <div id="bottom-nav-perfil"></div>
+  </div>
+
+  <!-- ========================= SCREEN: DISPONIBILIDAD PREVIA AL PASAPORTE ========================= -->
+  <div class="screen" id="s-disponibilidad-previa">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="topbar-title">Un momento antes</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:14%"></div></div>
+    <div class="screen-body">
+      <div style="padding:24px 20px 0">
+        <div class="eyebrow mb-4">Paso 1.5 · Opcional</div>
+        <h2 class="display-sm mb-8">Cuéntanos sobre tu tiempo</h2>
+        <p class="lead mb-20">Esta información nos ayuda a personalizar las recomendaciones desde el inicio.</p>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="form-group">
+            <label class="label">¿En qué zona vives?</label>
+            <select class="input" id="dp-zona">
+              <option value="">Selecciona tu alcaldía…</option>
+              <option value="Iztapalapa" selected>Iztapalapa</option>
+              <option value="Gustavo A. Madero">Gustavo A. Madero</option>
+              <option value="Álvaro Obregón">Álvaro Obregón</option>
+              <option value="Otra">Otra</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">¿Cuántas horas al día tienes disponibles?</label>
+            <input type="range" id="dp-horas" min="1" max="8" value="4" oninput="document.getElementById('dp-horas-val').textContent=this.value+' horas'">
+            <div class="row-between mt-8">
+              <span class="caption">1 hora</span>
+              <strong style="font-size:14px;color:var(--mint-dark)" id="dp-horas-val">4 horas</strong>
+              <span class="caption">8 horas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:20px">
+        <button class="btn btn-primary" onclick="savePrevDisp()">
+          Continuar a la entrevista
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-ghost mt-8" onclick="goTo('s-prep-entrevista')">Omitir por ahora</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= MODAL: FILTRO ========================= -->
+  <div class="modal-backdrop" id="modal-filtro">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 style="font-size:17px;font-weight:800;margin-bottom:16px">Filtrar oportunidades</h3>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-group">
+          <label class="label">Tipo de jornada</label>
+          <select class="input" id="filter-jornada">
+            <option>Cualquiera</option>
+            <option>Tiempo completo</option>
+            <option>Medio tiempo</option>
+            <option>Por horas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="label">Salario mínimo mensual</label>
+          <input type="range" id="filter-salario" min="5000" max="20000" step="1000" value="8000" oninput="document.getElementById('filter-salario-val').textContent='$'+parseInt(this.value).toLocaleString()">
+          <div class="row-between mt-8">
+            <span class="caption">$5,000</span>
+            <strong style="font-size:14px;color:var(--mint-dark)" id="filter-salario-val">$8,000</strong>
+            <span class="caption">$20,000</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Modalidad</label>
+          <div class="chips-wrap">
+            <span class="chip selected" onclick="this.classList.toggle('selected')">Presencial</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">Híbrido</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">Remoto</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary mt-20" onclick="applyFilters()">Aplicar filtros</button>
+      <button class="btn btn-ghost mt-8" onclick="closeModal('modal-filtro')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ========================= MODAL: RESET CONFIRM ========================= -->
+  <div class="modal-backdrop" id="modal-reset">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div style="text-align:center;padding:10px 0 20px">
+        <div style="width:56px;height:56px;background:var(--error-light);border-radius:50%;display:grid;place-items:center;margin:0 auto 16px">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </div>
+        <h3 style="font-size:18px;font-weight:800;margin-bottom:8px">¿Reiniciar la demo?</h3>
+        <p class="lead">Esto borrará todos los datos y regresará al inicio. Esta acción no se puede deshacer.</p>
+      </div>
+      <button class="btn btn-danger" onclick="resetApp()">Sí, reiniciar demostración</button>
+      <button class="btn btn-ghost mt-8" onclick="closeModal('modal-reset')">Cancelar</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+/* ============================================================
+   CUIDALIA · APP STATE & NAVIGATION
+   ============================================================ */
+
+// --- STATE ---
+let state = {
+  user: { nombre:'', email:'', avatar:'' },
+  disponibilidad: { zona:'Iztapalapa', horas:4, dias:['L','M','Mi','J','V'], modalidad:'Presencial' },
+  experiencias: [],
+  habilidades: [],
+  habilidadesValidadas: [],
+  intereses: [],
+  objetivo: '',
+  capacitacion: '',
+  postulaciones: [],
+  cursosGuardados: [],
+  navUnlocked: false,
+  currentScreen: 's-bienvenida',
+};
+let history = [];
+let interviewStep = 0;
+let selectedJobForApp = null;
+
+// --- LOAD / SAVE STATE ---
+function saveState() {
+  try { localStorage.setItem('cuidalia_state', JSON.stringify(state)); } catch(e){}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem('cuidalia_state');
+    if(s) { state = JSON.parse(s); return true; }
+  } catch(e){}
+  return false;
+}
+
+// --- NAVIGATION ---
+function goTo(screenId, skipHistory) {
+  const current = document.querySelector('.screen.active');
+  const next = document.getElementById(screenId);
+  if(!next || current === next) return;
+  if(!skipHistory) history.push(state.currentScreen);
+  current.classList.remove('active');
+  current.classList.add('slide-out');
+  setTimeout(() => current.classList.remove('slide-out'), 300);
+  next.classList.add('active');
+  state.currentScreen = screenId;
+  saveState();
+  renderNavBars();
+  // Scroll to top
+  const body = next.querySelector('.screen-body');
+  if(body) body.scrollTop = 0;
+  onScreenEnter(screenId);
+}
+
+function goBack() {
+  if(history.length === 0) return;
+  const prev = history.pop();
+  const current = document.querySelector('.screen.active');
+  const prevEl = document.getElementById(prev);
+  if(!prevEl || current === prevEl) return;
+  current.classList.remove('active');
+  prevEl.classList.add('active');
+  state.currentScreen = prev;
+  saveState();
+  renderNavBars();
+  const body = prevEl.querySelector('.screen-body');
+  if(body) body.scrollTop = 0;
+}
+
+function onScreenEnter(id) {
+  if(id === 's-entrevista') initInterview();
+  if(id === 's-revision') renderRevision();
+  if(id === 's-traductor') startTranslator();
+  if(id === 's-validacion') renderValidacion();
+  if(id === 's-pasaporte') renderPassport();
+  if(id === 's-orientacion') renderOrientacion();
+  if(id === 's-objetivo') renderObjetivo();
+  if(id === 's-fortalezas') renderFortalezas();
+  if(id === 's-cursos') renderCursos();
+  if(id === 's-ruta') renderRuta();
+  if(id === 's-oportunidades') renderOportunidades();
+  if(id === 's-seguimiento') renderSeguimiento();
+  if(id === 's-perfil') renderPerfil();
+  if(id === 's-bienvenida-personal') renderWelcomePersonal();
+}
+
+/* ============================================================
+   BOTTOM NAV
+   ============================================================ */
+const NAV_ITEMS = [
+  { id:'inicio', icon:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>', label:'Inicio', screen:'s-oportunidades' },
+  { id:'ruta', icon:'<path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>', label:'Mi ruta', screen:'s-ruta' },
+  { id:'pasaporte', icon:'<path d="m12 2 9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6Z"/><path d="m9 12 2 2 4-4"/>', label:'Pasaporte', screen:'s-pasaporte' },
+  { id:'oportunidades', icon:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 13h18"/>', label:'Empleos', screen:'s-oportunidades' },
+  { id:'perfil', icon:'<circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/>', label:'Perfil', screen:'s-perfil' },
+];
+
+function buildNav(containerId, activeId) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  if(!state.navUnlocked) { el.style.display='none'; return; }
+  el.style.display='grid';
+  el.style.cssText = 'height:68px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;padding:0 4px 8px;flex-shrink:0;position:relative;z-index:5;';
+  el.innerHTML = NAV_ITEMS.map(n => `
+    <button class="nav-item${n.id===activeId?' active':''}" onclick="navTo('${n.id}')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n.icon}</svg>
+      <span>${n.label}</span>
+    </button>
+  `).join('');
+}
+
+function renderNavBars() {
+  const s = state.currentScreen;
+  const map = {
+    's-oportunidades':['main-bottom-nav','inicio'],
+    's-ruta':['bottom-nav-ruta','ruta'],
+    's-pasaporte':['bottom-nav-pas','pasaporte'],
+    's-seguimiento':['bottom-nav-seg','oportunidades'],
+    's-perfil':['bottom-nav-perfil','perfil'],
+    's-disponibilidad':['bottom-nav',''],
+    's-orientacion':['bottom-nav-orientacion',''],
+    's-objetivo':['bottom-nav-objetivo',''],
+    's-fortalezas':['bottom-nav-fortalezas',''],
+    's-cursos':['bottom-nav-cursos',''],
+    's-capacitacion':['bottom-nav-cap',''],
+    's-postulacion':['bottom-nav-post',''],
+  };
+  if(map[s]) buildNav(map[s][0], map[s][1]);
+}
+
+function navTo(id) {
+  const item = NAV_ITEMS.find(n => n.id === id);
+  if(item) goTo(item.screen, false);
+}
+
+function unlockNav() {
+  state.navUnlocked = true;
+  document.getElementById('reset-btn').classList.remove('hidden');
+  saveState();
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(msg, icon='') {
+  const t = document.getElementById('toast');
+  t.innerHTML = icon + msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+function showLoading(text='Procesando…') {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+/* ============================================================
+   SCREEN 02 · REGISTRO
+   ============================================================ */
+function submitRegistro() {
+  let ok = true;
+  const nombre = document.getElementById('r-nombre').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass = document.getElementById('r-password').value;
+  const terms = document.getElementById('r-terms').checked;
+
+  const showErr = (id, show) => {
+    document.getElementById('err-'+id).classList.toggle('show', !show);
+    document.getElementById('r-'+id === 'r-pass' ? 'r-password' : 'r-'+id).classList.toggle('error', !show);
+  };
+
+  if(!nombre) { document.getElementById('err-nombre').classList.add('show'); document.getElementById('r-nombre').classList.add('error'); ok=false; }
+  else { document.getElementById('err-nombre').classList.remove('show'); document.getElementById('r-nombre').classList.remove('error'); }
+
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if(!emailOk) { document.getElementById('err-email').classList.add('show'); document.getElementById('r-email').classList.add('error'); ok=false; }
+  else { document.getElementById('err-email').classList.remove('show'); document.getElementById('r-email').classList.remove('error'); }
+
+  if(pass.length < 6) { document.getElementById('err-pass').classList.add('show'); document.getElementById('r-password').classList.add('error'); ok=false; }
+  else { document.getElementById('err-pass').classList.remove('show'); document.getElementById('r-password').classList.remove('error'); }
+
+  if(!terms) { document.getElementById('err-terms').classList.add('show'); ok=false; }
+  else { document.getElementById('err-terms').classList.remove('show'); }
+
+  if(!ok) { showToast('Revisa los campos marcados en rojo'); return; }
+
+  state.user.nombre = nombre;
+  state.user.email = email;
+  state.user.avatar = nombre.charAt(0).toUpperCase();
+  saveState();
+  showLoading('Creando tu cuenta…');
+  setTimeout(() => { hideLoading(); goTo('s-bienvenida-personal'); }, 1400);
+}
+
+/* ============================================================
+   SCREEN 03 · BIENVENIDA PERSONAL
+   ============================================================ */
+function renderWelcomePersonal() {
+  const n = state.user.nombre || 'amiga';
+  document.getElementById('welcome-name').textContent = '¡Hola, ' + n.split(' ')[0] + '!';
+  document.getElementById('welcome-avatar').textContent = n.charAt(0).toUpperCase();
+}
+
+/* ============================================================
+   SCREEN 05 · ENTREVISTA
+   ============================================================ */
+const INTERVIEW_QA = [
+  {
+    q: '¡Hola! Me da gusto conocerte. Para comenzar, ¿podrías contarme brevemente qué actividades de cuidado has realizado en los últimos años?',
+    options: [
+      'Cuidé a mis hijos pequeños (0-6 años)',
+      'Cuidé a personas mayores o enfermas en mi familia',
+      'Apoyé a familiares con discapacidad',
+      'Cuidé hijos y también trabajé de manera informal',
+    ]
+  },
+  {
+    q: '¡Gracias por compartir eso! ¿Cuántos años llevas realizando estas actividades de cuidado aproximadamente?',
+    options: ['Menos de 2 años','2 a 5 años','5 a 10 años','Más de 10 años']
+  },
+  {
+    q: '¿Llegaste a cuidar a más de una persona al mismo tiempo? Por ejemplo, niños y un adulto mayor.',
+    options: ['Sí, cuidé a varias personas a la vez','No, solo una persona a la vez','En diferentes etapas sí y en otras no']
+  },
+  {
+    q: '¿Realizaste alguna actividad relacionada con salud o nutrición, como dar medicamentos, preparar dietas especiales o acompañar a consultas?',
+    options: ['Sí, frecuentemente','Sí, de vez en cuando','No, pero me gustaría aprender','No, no era necesario']
+  },
+  {
+    q: 'Última pregunta: ¿Qué habilidad tuya crees que es la más valiosa para trabajar con otras personas?',
+    options: ['Paciencia y escucha activa','Organización y planificación','Empatía y apoyo emocional','Resolución de problemas bajo presión']
+  }
+];
+
+function initInterview() {
+  interviewStep = 0;
+  document.getElementById('chat-wrap').innerHTML = '';
+  document.getElementById('chat-input').value = '';
+  addAIMessage(INTERVIEW_QA[0].q);
+  renderOptions(INTERVIEW_QA[0].options);
+  updateInterviewProgress();
+}
+
+function addAIMessage(text, delay=0) {
+  const wrap = document.getElementById('chat-wrap');
+  if(delay>0) {
+    const thinking = document.createElement('div');
+    thinking.className='ai-thinking';
+    thinking.innerHTML='<div class="dot-pulse"><span></span><span></span><span></span></div>';
+    wrap.appendChild(thinking);
+    wrap.scrollTop = wrap.scrollHeight;
+    setTimeout(()=>{
+      thinking.remove();
+      const el = document.createElement('div');
+      el.className = 'chat-bubble ai';
+      el.textContent = text;
+      wrap.appendChild(el);
+      wrap.scrollTop = wrap.scrollHeight;
+    }, delay);
+  } else {
+    const el = document.createElement('div');
+    el.className = 'chat-bubble ai';
+    el.textContent = text;
+    wrap.appendChild(el);
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+}
+
+function addUserMessage(text) {
+  const wrap = document.getElementById('chat-wrap');
+  const el = document.createElement('div');
+  el.className = 'chat-bubble user';
+  el.textContent = text;
+  el.style.alignSelf = 'flex-end';
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function renderOptions(opts) {
+  const container = document.getElementById('interview-options');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost btn-sm';
+    btn.style.cssText = 'text-align:left;justify-content:flex-start;font-size:12px;';
+    btn.textContent = opt;
+    btn.onclick = () => selectOption(opt);
+    container.appendChild(btn);
+  });
+}
+
+function selectOption(text) {
+  document.getElementById('interview-options').innerHTML = '';
+  document.getElementById('chat-input').value = '';
+  addUserMessage(text);
+  processAnswer(text);
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  document.getElementById('interview-options').innerHTML = '';
+  addUserMessage(text);
+  processAnswer(text);
+}
+
+function processAnswer(text) {
+  // Save answer
+  if(!state.experiencias) state.experiencias = [];
+  state.experiencias[interviewStep] = { q: INTERVIEW_QA[interviewStep].q, a: text };
+  interviewStep++;
+  updateInterviewProgress();
+  if(interviewStep < INTERVIEW_QA.length) {
+    addAIMessage(INTERVIEW_QA[interviewStep].q, 1200);
+    setTimeout(() => renderOptions(INTERVIEW_QA[interviewStep].options), 1300);
+  } else {
+    setTimeout(()=>{
+      addAIMessage('¡Excelente, ' + (state.user.nombre||'').split(' ')[0] + '! Eso es todo lo que necesitaba. Estoy analizando tu historia para identificar tus habilidades. Dame un momento…', 900);
+    }, 500);
+    setTimeout(()=>{
+      saveState();
+      goTo('s-revision');
+    }, 3500);
+  }
+}
+
+function updateInterviewProgress() {
+  const total = INTERVIEW_QA.length;
+  const pct = Math.round((interviewStep/total)*100);
+  const bar = document.getElementById('interview-progress-bar');
+  const badge = document.getElementById('interview-progress-badge');
+  if(bar) bar.style.width = (25 + pct*.75) + '%';
+  if(badge) badge.textContent = Math.min(interviewStep+1, total) + '/' + total;
+}
+
+/* ============================================================
+   SCREEN 06 · REVISIÓN
+   ============================================================ */
+const DEMO_EXPERIENCIAS = [
+  { icon:'👶', title:'Cuidado de hijos pequeños', detail:'Más de 8 años cuidando niños de 0 a 6 años', tags:['Crianza','Desarrollo infantil','Nutrición'] },
+  { icon:'🏠', title:'Gestión del hogar', detail:'Organización, planificación y administración familiar', tags:['Organización','Multitarea','Administración'] },
+  { icon:'🩺', title:'Asistencia en salud básica', detail:'Acompañamiento médico y administración de medicamentos', tags:['Primeros auxilios','Seguimiento médico'] },
+  { icon:'❤️', title:'Apoyo emocional', detail:'Contención y apoyo emocional a personas dependientes', tags:['Empatía','Escucha activa','Comunicación'] },
+];
+
+function renderRevision() {
+  const list = document.getElementById('experiencias-list');
+  list.innerHTML = DEMO_EXPERIENCIAS.map(e => `
+    <div style="border:1.5px solid var(--line);border-radius:var(--radius-md);padding:14px;display:flex;gap:12px;align-items:flex-start">
+      <span style="font-size:28px;line-height:1">${e.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;margin-bottom:3px">${e.title}</div>
+        <div class="caption mb-8">${e.detail}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${e.tags.map(t=>`<span class="badge badge-mint">${t}</span>`).join('')}
+        </div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/></svg>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   SCREEN 07 · TRADUCTOR
+   ============================================================ */
+const HABILIDADES_TRADUCIDAS = [
+  { nombre:'Desarrollo infantil temprano', nivel:90, color:'var(--mint)' },
+  { nombre:'Planificación y organización', nivel:85, color:'var(--mint-dark)' },
+  { nombre:'Comunicación efectiva', nivel:88, color:'var(--lilac)' },
+  { nombre:'Atención a personas en situación de dependencia', nivel:82, color:'var(--mint)' },
+  { nombre:'Gestión emocional y contención', nivel:91, color:'var(--lilac)' },
+  { nombre:'Nutrición y alimentación básica', nivel:75, color:'var(--olive)' },
+  { nombre:'Primeros auxilios y salud básica', nivel:70, color:'var(--clay)' },
+  { nombre:'Resolución de problemas bajo presión', nivel:87, color:'var(--mint-dark)' },
+];
+
+function startTranslator() {
+  state.habilidades = HABILIDADES_TRADUCIDAS;
+  saveState();
+  document.getElementById('translator-loading').classList.remove('hidden');
+  document.getElementById('translator-results').classList.add('hidden');
+  document.getElementById('translator-actions').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('translator-loading').classList.add('hidden');
+    const results = document.getElementById('translator-results');
+    results.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:12px;padding:0 0 8px">
+        ${HABILIDADES_TRADUCIDAS.map(h=>`
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink)">${h.nombre}</span>
+              <span style="font-size:11px;font-weight:700;color:var(--mint-dark)">${h.nivel}%</span>
+            </div>
+            <div class="score-bar"><div class="score-fill" style="width:${h.nivel}%;background:${h.color}" data-w="${h.nivel}"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    results.classList.remove('hidden');
+    document.getElementById('translator-actions').classList.remove('hidden');
+    // Animate bars
+    setTimeout(()=>{
+      results.querySelectorAll('.score-fill').forEach(b=>{
+        b.style.width='0%';
+        setTimeout(()=>{ b.style.width=b.dataset.w+'%'; }, 50);
+      });
+    }, 100);
+  }, 2800);
+}
+
+/* ============================================================
+   SCREEN 08 · VALIDACIÓN
+   ============================================================ */
+function renderValidacion() {
+  const list = document.getElementById('skills-validate-list');
+  list.innerHTML = HABILIDADES_TRADUCIDAS.map((h,i) => `
+    <button class="card card-selectable row" style="gap:12px;text-align:left" onclick="toggleSkill(this,'${h.nombre}')" data-skill="${h.nombre}">
+      <div style="width:38px;height:38px;border-radius:var(--radius-sm);background:var(--mint-light);display:grid;place-items:center;color:var(--mint-dark);flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${h.nombre}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:2px">${h.nivel}% de confianza</div>
+      </div>
+      <div class="card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-9"/></svg></div>
+    </button>
+  `).join('');
+  // Pre-select top 6
+  const btns = list.querySelectorAll('.card-selectable');
+  btns.forEach((b,i) => { if(i<6) { b.classList.add('selected'); } });
+  state.habilidadesValidadas = HABILIDADES_TRADUCIDAS.slice(0,6).map(h=>h.nombre);
+  updateValidarBtn();
+}
+
+function toggleSkill(el, skill) {
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected')) {
+    if(!state.habilidadesValidadas.includes(skill)) state.habilidadesValidadas.push(skill);
+  } else {
+    state.habilidadesValidadas = state.habilidadesValidadas.filter(s=>s!==skill);
+  }
+  updateValidarBtn();
+}
+
+function updateValidarBtn() {
+  document.getElementById('btn-validar').disabled = state.habilidadesValidadas.length === 0;
+}
+
+function submitValidacion() {
+  saveState();
+  showLoading('Generando tu Pasaporte de Talento…');
+  setTimeout(() => { hideLoading(); goTo('s-pasaporte'); }, 2000);
+}
+
+/* ============================================================
+   SCREEN 09 · PASAPORTE
+   ============================================================ */
+function renderPassport() {
+  const n = state.user.nombre || 'María López';
+  document.getElementById('passport-name').textContent = n;
+  document.getElementById('passport-avatar').textContent = n.charAt(0).toUpperCase();
+  document.getElementById('perfil-avatar') && (document.getElementById('perfil-avatar').textContent = n.charAt(0).toUpperCase());
+
+  const today = new Date();
+  document.getElementById('passport-date').textContent =
+    today.getDate() + '/' + (today.getMonth()+1) + '/' + today.getFullYear();
+
+  const skills = state.habilidadesValidadas.length ? state.habilidadesValidadas : HABILIDADES_TRADUCIDAS.slice(0,6).map(h=>h.nombre);
+  document.getElementById('passport-skills-count').textContent = skills.length;
+
+  document.getElementById('passport-skills-list').innerHTML = skills.slice(0,5).map(s=>`
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.85)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/></svg>
+      ${s}
+    </div>
+  `).join('');
+
+  if(skills.length > 5) {
+    document.getElementById('passport-skills-list').innerHTML +=
+      `<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">+${skills.length-5} habilidades más</div>`;
+  }
+}
+
+function sharePassport() {
+  showToast('¡Enlace copiado al portapapeles!', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m9 11 3 3L22 4"/></svg>');
+}
+
+/* ============================================================
+   SCREEN 10 · DISPONIBILIDAD
+   ============================================================ */
+function saveDisponibilidad() {
+  const zona = document.getElementById('d-zona').value;
+  if(!zona) { showToast('Selecciona tu zona'); return; }
+  state.disponibilidad.zona = zona;
+  state.disponibilidad.horas = parseInt(document.getElementById('d-horas').value);
+  state.disponibilidad.dias = [...document.querySelectorAll('.day-btn.selected')].map(b=>b.dataset.day);
+  saveState();
+  showToast('✓ Disponibilidad guardada');
+  setTimeout(() => goTo('s-orientacion'), 800);
+}
+
+function savePrevDisp() {
+  state.disponibilidad.zona = document.getElementById('dp-zona').value || 'Iztapalapa';
+  state.disponibilidad.horas = parseInt(document.getElementById('dp-horas').value);
+  saveState();
+  goTo('s-prep-entrevista');
+}
+
+// Days toggle
+document.querySelectorAll('.day-btn').forEach(b => {
+  b.addEventListener('click', function() { this.classList.toggle('selected'); });
+});
+
+function selectModal(el) {
+  document.querySelectorAll('.radio-card').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  state.disponibilidad.modalidad = el.querySelector('.radio-card div div:first-child')?.textContent || '';
+}
+
+/* ============================================================
+   SCREEN 11 · ORIENTACIÓN
+   ============================================================ */
+const INTERESES = [
+  { id:'infantil', icon:'👶', label:'Cuidado infantil', sub:'Estancias, guarderías, cuidadoras' },
+  { id:'educacion', icon:'📚', label:'Educación y apoyo escolar', sub:'Auxiliar educativa, tutora' },
+  { id:'adultos', icon:'🧓', label:'Cuidado de adultos mayores', sub:'Gerontología, asistencia' },
+  { id:'salud', icon:'🩺', label:'Asistencia en salud', sub:'Auxiliar de enfermería, promotora' },
+  { id:'social', icon:'🤝', label:'Trabajo social comunitario', sub:'Promotora, gestora social' },
+  { id:'emprendimiento', icon:'💡', label:'Microemprendimiento', sub:'Servicios de cuidado propio' },
+];
+
+function renderOrientacion() {
+  const grid = document.getElementById('intereses-grid');
+  grid.innerHTML = INTERESES.map(i => `
+    <button class="card card-selectable" style="text-align:center;padding:18px 10px;gap:6px;display:flex;flex-direction:column;align-items:center" onclick="toggleInteres(this,'${i.id}')" data-interes="${i.id}">
+      <span style="font-size:32px">${i.icon}</span>
+      <span style="font-size:12px;font-weight:700;color:var(--ink);line-height:1.3">${i.label}</span>
+      <span style="font-size:10px;color:var(--sub);line-height:1.3">${i.sub}</span>
+      <div class="card-check" style="position:absolute;top:8px;right:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-9"/></svg></div>
+    </button>
+  `).join('');
+  grid.querySelectorAll('.card-selectable').forEach(c => c.style.position='relative');
+  // Pre-select infantil
+  const infantilBtn = grid.querySelector('[data-interes="infantil"]');
+  if(infantilBtn) { infantilBtn.classList.add('selected'); state.intereses = ['infantil']; }
+  updateOrientacionBtn();
+}
+
+function toggleInteres(el, id) {
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected')) { if(!state.intereses.includes(id)) state.intereses.push(id); }
+  else { state.intereses = state.intereses.filter(i=>i!==id); }
+  updateOrientacionBtn();
+}
+
+function updateOrientacionBtn() {
+  document.getElementById('btn-orientacion').disabled = state.intereses.length === 0;
+}
+
+function saveOrientacion() {
+  saveState();
+  goTo('s-objetivo');
+}
+
+/* ============================================================
+   SCREEN 12 · OBJETIVO
+   ============================================================ */
+const ROLES_INFANTIL = [
+  { id:'cuidadora', icon:'🤱', label:'Cuidadora en estancia infantil', nivel:'Entrada' },
+  { id:'auxiliar', icon:'👩‍🏫', label:'Auxiliar educativa', nivel:'Entrada' },
+  { id:'coordinadora', icon:'📋', label:'Coordinadora de grupo', nivel:'Medio' },
+  { id:'promotora', icon:'📢', label:'Promotora de desarrollo infantil', nivel:'Medio' },
+];
+
+function renderObjetivo() {
+  const list = document.getElementById('roles-list');
+  list.innerHTML = ROLES_INFANTIL.map(r => `
+    <button class="card card-selectable row" style="gap:12px;text-align:left" onclick="selectRol(this,'${r.id}')" data-rol="${r.id}">
+      <span style="font-size:28px">${r.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${r.label}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:2px">Nivel de entrada: ${r.nivel}</div>
+      </div>
+      <div class="card-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-9"/></svg></div>
+    </button>
+  `).join('');
+}
+
+function selectRol(el, id) {
+  document.querySelectorAll('#roles-list .card-selectable').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.objetivo = id;
+  document.getElementById('btn-objetivo').disabled = false;
+}
+
+function saveObjetivo() {
+  saveState();
+  goTo('s-fortalezas');
+}
+
+/* ============================================================
+   SCREEN 13 · FORTALEZAS Y BRECHAS
+   ============================================================ */
+const FORTALEZAS_DATA = [
+  { label:'Paciencia y regulación emocional', pct:94 },
+  { label:'Comunicación con niños pequeños', pct:89 },
+  { label:'Organización de rutinas diarias', pct:85 },
+  { label:'Atención a señales de desarrollo', pct:82 },
+  { label:'Trabajo en equipo y colaboración', pct:78 },
+];
+const BRECHAS_DATA = [
+  { label:'Marco legal y normativo de estancias', pct:30, curso:'Legislación para cuidadoras' },
+  { label:'Pedagogía y aprendizaje formal', pct:45, curso:'Introducción a educación inicial' },
+  { label:'Primeros auxilios certificados', pct:50, curso:'Certificación en primeros auxilios' },
+  { label:'Herramientas digitales básicas', pct:40, curso:'Tecnología para cuidadoras' },
+];
+
+function renderFortalezas() {
+  document.getElementById('fortalezas-list').innerHTML = FORTALEZAS_DATA.map(f=>`
+    <div style="padding:12px 14px;border:1.5px solid var(--success-light);border-radius:var(--radius-md);background:var(--success-light)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:var(--ink)">${f.label}</span>
+        <span style="font-size:11px;font-weight:700;color:var(--success)">${f.pct}%</span>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${f.pct}%;background:var(--success)"></div></div>
+    </div>
+  `).join('');
+  document.getElementById('brechas-list').innerHTML = BRECHAS_DATA.map(b=>`
+    <div style="padding:12px 14px;border:1.5px solid var(--warning-light);border-radius:var(--radius-md);background:var(--warning-light)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:var(--ink)">${b.label}</span>
+        <span style="font-size:11px;font-weight:700;color:var(--warning)">${b.pct}%</span>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${b.pct}%;background:var(--warning)"></div></div>
+      <div style="font-size:10px;color:var(--warning);margin-top:6px;font-weight:600">→ Curso sugerido: ${b.curso}</div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   SCREEN 14 · CURSOS
+   ============================================================ */
+const CURSOS_DATA = [
+  {
+    icon:'�', titulo:'Cuidador de niños',
+    inst:'Plataforma Aprender', duracion:'A tu ritmo', modalidad:'En línea',
+    cert:true, gratuito:true,
+    desc:'Aprende habilidades clave para el cuidado y acompañamiento de niños, con reconocimiento de tu experiencia previa.',
+    tag:'brecha',
+    url:'https://aprende.org/cursos/view/25'
+  },
+  {
+    icon:'�📖', titulo:'Legislación para trabajadoras del cuidado',
+    inst:'IMSS Bienestar', duracion:'20 horas', modalidad:'En línea',
+    cert:true, gratuito:true,
+    desc:'Conoce tus derechos, las normas de las estancias infantiles y el marco legal que te protege.',
+    tag:'brecha'
+  },
+  {
+    icon:'👩‍🎓', titulo:'Introducción a educación inicial 0-3 años',
+    inst:'SEP · Plataforma aprende.mx', duracion:'40 horas', modalidad:'En línea',
+    cert:true, gratuito:true,
+    desc:'Fundamentos del desarrollo infantil, juego, estimulación temprana y ambientes de aprendizaje.',
+    tag:'brecha'
+  },
+  {
+    icon:'🩺', titulo:'Primeros auxilios pediátricos',
+    inst:'Cruz Roja Mexicana', duracion:'12 horas', modalidad:'Presencial',
+    cert:true, gratuito:false,
+    desc:'Certificación práctica en atención de emergencias con niños de 0 a 12 años.',
+    tag:'brecha'
+  },
+  {
+    icon:'💻', titulo:'Tecnología básica para cuidadoras',
+    inst:'Instituto Nacional de Educación para Adultos', duracion:'16 horas', modalidad:'Híbrido',
+    cert:false, gratuito:true,
+    desc:'Uso de celular, correo electrónico y herramientas básicas para gestionar tu trabajo.',
+    tag:'complemento'
+  },
+];
+
+function guardarCurso(titulo, inst, duracion, url) {
+  if(!state.cursosGuardados) state.cursosGuardados = [];
+  // Evitar duplicados
+  const yaGuardado = state.cursosGuardados.some(c => c.titulo === titulo);
+  if(yaGuardado) {
+    showToast('Este curso ya está en tu ruta ✓');
+    return;
+  }
+  state.cursosGuardados.push({ titulo, inst, duracion, url: url || '' });
+  saveState();
+  showToast('¡Curso agregado a tu ruta! →');
+}
+
+function renderCursos() {
+  document.getElementById('cursos-list').innerHTML = CURSOS_DATA.map((c,i)=>{
+    const yaGuardado = (state.cursosGuardados||[]).some(s => s.titulo === c.titulo);
+    return `
+    <div class="course-card">
+      <div class="course-card-header">
+        <div class="course-icon"><span style="font-size:20px">${c.icon}</span></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;margin-bottom:3px">${c.titulo}</div>
+          <div class="caption">${c.inst}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+            <span class="badge badge-mint">${c.duracion}</span>
+            <span class="badge badge-lilac">${c.modalidad}</span>
+            ${c.gratuito?'<span class="badge badge-olive">Gratuito</span>':'<span class="badge badge-clay">De pago</span>'}
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 16px 12px">
+        <p class="body-text">${c.desc}</p>
+        ${c.cert?`
+          <div style="margin-top:10px;padding:10px 12px;background:var(--lilac-light);border-radius:var(--radius-sm)">
+            <div style="font-size:11px;font-weight:700;color:var(--lilac);margin-bottom:4px">🏆 Opción de certificación</div>
+            <div class="caption">Requiere aprobar evaluación. Los certificados son emitidos por la institución, no por CuidalIA.</div>
+          </div>
+        `:''}
+        ${c.url?`
+          <a href="${c.url}" target="_blank" rel="noopener noreferrer"
+             style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:11px 14px;background:var(--mint-light);border:1.5px solid rgba(91,168,162,.3);border-radius:var(--radius-md);color:var(--mint-dark);font-size:13px;font-weight:700;text-decoration:none;transition:background .2s"
+             onmouseover="this.style.background='#d8f0ed'" onmouseout="this.style.background='var(--mint-light)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Ir al curso · Plataforma Aprender
+          </a>
+        `:''}
+      </div>
+      <div class="course-card-footer">
+        <span class="caption">${c.tag==='brecha'?'Cubre una brecha identificada':'Formación complementaria'}</span>
+        <button
+          class="btn btn-secondary btn-sm"
+          id="btn-guardar-${i}"
+          style="${yaGuardado?'background:var(--success-light);color:var(--success);border-color:var(--success)':''}"
+          onclick="guardarCurso('${c.titulo.replace(/'/g,"\\'")}','${c.inst.replace(/'/g,"\\'")}','${c.duracion}','${c.url||''}'); document.getElementById('btn-guardar-${i}').textContent='✓ En mi ruta'; document.getElementById('btn-guardar-${i}').style.cssText='background:var(--success-light);color:var(--success);border-color:var(--success);min-height:38px;padding:9px 14px;font-size:12px;border-radius:8px;border:1.5px solid'">
+          ${yaGuardado ? '✓ En mi ruta' : 'Guardar en mi ruta'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   SCREEN 15 · CAPACITACIÓN
+   ============================================================ */
+function selectCapacitacion(tipo) {
+  document.getElementById('cap-ruta').classList.toggle('selected', tipo==='ruta');
+  document.getElementById('cap-ahora').classList.toggle('selected', tipo==='ahora');
+  state.capacitacion = tipo;
+  document.getElementById('btn-capacitacion').disabled = false;
+}
+
+function submitCapacitacion() {
+  saveState();
+  if(state.capacitacion === 'ruta') goTo('s-ruta');
+  else goTo('s-oportunidades');
+}
+
+/* ============================================================
+   SCREEN 16 · RUTA DE APRENDIZAJE
+   ============================================================ */
+const RUTA_STEPS = [
+  { titulo:'Semana 1–2', desc:'Legislación para trabajadoras del cuidado', estado:'active', duracion:'20h' },
+  { titulo:'Semana 3–6', desc:'Introducción a educación inicial 0-3 años', estado:'pending', duracion:'40h' },
+  { titulo:'Semana 7', desc:'Primeros auxilios pediátricos (presencial)', estado:'pending', duracion:'12h' },
+];
+
+function renderRuta() {
+  // Combinar pasos base + cursos guardados por el usuario (sin duplicar)
+  const guardados = (state.cursosGuardados || []);
+  const titulosBase = RUTA_STEPS.map(s => s.desc);
+  const extrasGuardados = guardados.filter(c => !titulosBase.includes(c.titulo));
+
+  const todosLosSteps = [
+    ...RUTA_STEPS,
+    ...extrasGuardados.map(c => ({
+      titulo: 'Guardado por ti',
+      desc: c.titulo,
+      inst: c.inst,
+      estado: 'saved',
+      duracion: c.duracion,
+      url: c.url || ''
+    }))
+  ];
+
+  const totalSemanas = todosLosSteps.length <= 3 ? 7 : todosLosSteps.length * 2;
+  document.getElementById('ruta-summary').textContent =
+    todosLosSteps.length + ' módulos · ~' + totalSemanas + ' semanas';
+
+  document.getElementById('ruta-timeline').innerHTML = todosLosSteps.map((s, i) => `
+    <div class="timeline-item">
+      <div class="timeline-icon ${s.estado==='done'?'done':s.estado==='active'?'active':s.estado==='saved'?'active':''}">
+        ${s.estado==='done'
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/></svg>'
+          : s.estado==='active'
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+          : s.estado==='saved'
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>'}
+      </div>
+      <div style="flex:1;padding-top:6px">
+        <div style="font-size:11px;font-weight:600;color:var(--sub);margin-bottom:2px">
+          ${s.titulo} · ${s.duracion}
+          ${s.estado==='saved'?'<span style="background:var(--lilac-light);color:var(--lilac);padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;margin-left:4px">Guardado</span>':''}
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">${s.desc}</div>
+        ${s.inst ? `<div class="caption" style="margin-bottom:8px">${s.inst}</div>` : ''}
+        ${s.estado==='active' ? `
+          <button class="btn btn-secondary btn-sm" style="width:auto" onclick="showToast('Inscripción registrada ✓')">
+            Inscribirme ahora
+          </button>` : ''}
+        ${s.url ? `
+          <a href="${s.url}" target="_blank" rel="noopener noreferrer"
+             style="display:inline-flex;align-items:center;gap:7px;padding:9px 14px;background:var(--mint);border-radius:var(--radius-md);color:#fff;font-size:12px;font-weight:700;text-decoration:none;margin-top:4px;transition:background .2s"
+             onmouseover="this.style.background='var(--mint-dark)'" onmouseout="this.style.background='var(--mint)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Ir al curso
+          </a>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  // Mostrar aviso si no hay cursos guardados aún
+  if(guardados.length === 0) {
+    document.getElementById('ruta-timeline').innerHTML += `
+      <div style="margin-top:8px;padding:14px 16px;border:1.5px dashed var(--line);border-radius:var(--radius-md);text-align:center">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px">¿Quieres agregar más cursos a tu ruta?</div>
+        <button class="btn btn-secondary btn-sm" style="width:auto" onclick="goTo('s-cursos')">
+          Ver cursos disponibles
+        </button>
+      </div>`;
+  }
+}
+
+/* ============================================================
+   SCREEN 17 · OPORTUNIDADES
+   ============================================================ */
+const JOBS_DATA = [
+  {
+    id:1, categoria:'cuidado',
+    empresa:'Estancia Infantil Las Mariposas', siglas:'EM', color:'#E8F5F3',
+    titulo:'Cuidadora de niños 0-3 años', zona:'Iztapalapa · CDMX',
+    jornada:'Tiempo completo', salario:'$9,500/mes', modalidad:'Presencial',
+    match:95, descripcion:'Buscamos una persona comprometida con el desarrollo infantil para cuidar a niños de 0 a 3 años en nuestra estancia.',
+    requisitos:['Experiencia previa en cuidado de menores','Disponibilidad lunes a viernes 7am-4pm','Referencias laborales o familiares'],
+    tags:['Cuidado infantil','Desarrollo', 'Presencial'],
+  },
+  {
+    id:2, categoria:'educacion',
+    empresa:'Centro de Desarrollo Infantil CENDI No. 3', siglas:'CD', color:'#EDE8F5',
+    titulo:'Auxiliar educativa', zona:'Gustavo A. Madero · CDMX',
+    jornada:'Medio tiempo', salario:'$6,200/mes', modalidad:'Presencial',
+    match:87, descripcion:'Apoya a la educadora titular en las actividades del grupo de preescolar.',
+    requisitos:['Bachillerato terminado o en curso','Actitud propositiva','Gusto por trabajar con niños'],
+    tags:['Educación inicial','Auxiliar','Gobierno'],
+  },
+  {
+    id:3, categoria:'salud',
+    empresa:'Fundación Crecer CDMX A.C.', siglas:'FC', color:'#FAF0E8',
+    titulo:'Promotora de salud infantil', zona:'Xochimilco · CDMX',
+    jornada:'Por horas', salario:'$4,800/mes', modalidad:'Híbrido',
+    match:82, descripcion:'Apoya talleres de salud y nutrición dirigidos a madres y cuidadoras en comunidades.',
+    requisitos:['Habilidades de comunicación','Manejo básico de celular','Disponibilidad fines de semana'],
+    tags:['Salud','Comunidad','Flexible'],
+  },
+  {
+    id:4, categoria:'social',
+    empresa:'DIF Alcaldía Tlalpan', siglas:'DI', color:'#EFF4E6',
+    titulo:'Gestora social comunitaria', zona:'Tlalpan · CDMX',
+    jornada:'Tiempo completo', salario:'$10,200/mes', modalidad:'Presencial',
+    match:78, descripcion:'Coordina programas de apoyo a familias vulnerables y vincula a cuidadoras con servicios.',
+    requisitos:['Experiencia comunitaria','Manejo de paquetería básica','Iniciativa y liderazgo'],
+    tags:['Social','Gobierno','Liderazgo'],
+  },
+  {
+    id:5, categoria:'cuidado',
+    empresa:'Nido Montessori del Valle', siglas:'NM', color:'#E8F5F3',
+    titulo:'Asistente en sala de infantes', zona:'Coyoacán · CDMX',
+    jornada:'Tiempo completo', salario:'$8,800/mes', modalidad:'Presencial',
+    match:91, descripcion:'Trabaja junto a nuestra equipo pedagógico en la atención de niños de 6 meses a 2 años.',
+    requisitos:['Amor por la primera infancia','Disposición para aprender metodología Montessori','Bachillerato terminado'],
+    tags:['Montessori','Infantes','Educación'],
+  },
+];
+
+let currentFilter = 'all';
+
+function renderOportunidades(filter) {
+  if(filter) currentFilter = filter;
+  const filtered = currentFilter==='all' ? JOBS_DATA : JOBS_DATA.filter(j=>j.categoria===currentFilter);
+  document.getElementById('jobs-list').innerHTML = filtered.map(j=>`
+    <div class="job-card" onclick="openJob(${j.id})" style="cursor:pointer">
+      <div class="row-between">
+        <div class="row" style="gap:12px">
+          <div class="job-org" style="background:${j.color}">${j.siglas}</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink)">${j.titulo}</div>
+            <div class="caption">${j.empresa}</div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:11px;font-weight:700;color:var(--success)">${j.match}% match</div>
+          <div class="caption">${j.zona.split('·')[0].trim()}</div>
+        </div>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${j.match}%;background:linear-gradient(90deg,var(--mint),var(--mint-dark))"></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${j.tags.map(t=>`<span class="badge badge-mint">${t}</span>`).join('')}
+        <span class="badge badge-demo">${j.jornada}</span>
+      </div>
+      <div class="row-between">
+        <span style="font-size:13px;font-weight:700;color:var(--mint-dark)">${j.salario}</span>
+        <span class="badge" style="background:var(--canvas);color:var(--sub)">${j.modalidad}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterJobs(cat, el) {
+  document.querySelectorAll('#job-filters .chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  renderOportunidades(cat);
+}
+
+function openJob(id) {
+  const job = JOBS_DATA.find(j=>j.id===id);
+  if(!job) return;
+  selectedJobForApp = job;
+  const content = document.getElementById('postulacion-content');
+  content.innerHTML = `
+    <div class="row" style="gap:12px;margin-bottom:20px">
+      <div class="job-org" style="background:${job.color};width:50px;height:50px;font-size:16px">${job.siglas}</div>
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--ink)">${job.titulo}</div>
+        <div class="caption">${job.empresa}</div>
+        <div class="caption">${job.zona}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="badge badge-mint">${job.jornada}</span>
+      <span class="badge badge-demo">${job.salario}</span>
+      <span class="badge badge-lilac">${job.modalidad}</span>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Descripción</div>
+      <p class="body-text">${job.descripcion}</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Requisitos</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${job.requisitos.map(r=>`
+          <div class="row" style="gap:8px;font-size:13px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m9 11 3 3L22 4"/></svg>
+            ${r}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div style="background:var(--mint-light);border-radius:var(--radius-md);padding:14px;margin-bottom:4px">
+      <div style="font-size:12px;font-weight:700;color:var(--mint-dark);margin-bottom:4px">Tu compatibilidad</div>
+      <div class="row-between mb-4">
+        <span class="caption">Match con tu perfil</span>
+        <span style="font-size:14px;font-weight:800;color:var(--mint-dark)">${job.match}%</span>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${job.match}%;background:var(--mint-dark)"></div></div>
+    </div>
+  `;
+  goTo('s-postulacion');
+}
+
+function submitPostulacion() {
+  if(!selectedJobForApp) return;
+  showLoading('Enviando tu postulación…');
+  const postulacion = {
+    id: Date.now(),
+    job: selectedJobForApp,
+    fecha: new Date().toLocaleDateString('es-MX'),
+    estado: 'En revisión'
+  };
+  if(!state.postulaciones) state.postulaciones = [];
+  state.postulaciones.push(postulacion);
+  saveState();
+  setTimeout(() => {
+    hideLoading();
+    goTo('s-seguimiento');
+  }, 1800);
+}
+
+/* ============================================================
+   SCREEN 19 · SEGUIMIENTO
+   ============================================================ */
+function renderSeguimiento() {
+  const list = document.getElementById('seguimiento-list');
+  const posts = state.postulaciones || [];
+  if(posts.length === 0) {
+    list.innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--sub)">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 10px;display:block;opacity:.4"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 13h18"/></svg>
+        <div class="caption">Aún no tienes postulaciones</div>
+      </div>`;
+    return;
+  }
+  list.innerHTML = posts.slice().reverse().map(p=>`
+    <div style="border:1.5px solid var(--line);border-radius:var(--radius-md);padding:14px">
+      <div class="row-between mb-8">
+        <div>
+          <div style="font-size:13px;font-weight:700">${p.job.titulo}</div>
+          <div class="caption">${p.job.empresa}</div>
+        </div>
+        <span class="badge badge-mint">${p.estado}</span>
+      </div>
+      <div class="row-between">
+        <span class="caption">Enviada el ${p.fecha}</span>
+        <span class="badge badge-demo">Demo</span>
+      </div>
+      <div class="notice notice-info mt-8">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg>
+        <span>Te avisaremos por correo cuando el empleador responda.</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   PERFIL
+   ============================================================ */
+function renderPerfil() {
+  const n = state.user.nombre || 'María López';
+  const e = state.user.email || 'maria@ejemplo.com';
+  document.getElementById('perfil-name').textContent = n;
+  document.getElementById('perfil-email').textContent = e;
+  document.getElementById('perfil-avatar').textContent = n.charAt(0).toUpperCase();
+}
+
+function editPerfil() {
+  showToast('Edición de perfil disponible próximamente');
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function showFilterModal() {
+  document.getElementById('modal-filtro').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function applyFilters() {
+  closeModal('modal-filtro');
+  showToast('Filtros aplicados ✓');
+  renderOportunidades();
+}
+
+function confirmReset() {
+  document.getElementById('modal-reset').classList.add('open');
+}
+
+// Close modal on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+/* ============================================================
+   RESET
+   ============================================================ */
+function resetApp() {
+  closeModal('modal-reset');
+  showLoading('Reiniciando demostración…');
+  setTimeout(() => {
+    localStorage.removeItem('cuidalia_state');
+    state = {
+      user:{nombre:'',email:'',avatar:''},
+      disponibilidad:{zona:'Iztapalapa',horas:4,dias:['L','M','Mi','J','V'],modalidad:'Presencial'},
+      experiencias:[], habilidades:[], habilidadesValidadas:[],
+      intereses:[], objetivo:'', capacitacion:'', postulaciones:[],
+      cursosGuardados:[],
+      navUnlocked:false, currentScreen:'s-bienvenida',
+    };
+    history = [];
+    interviewStep = 0;
+    selectedJobForApp = null;
+    hideLoading();
+    document.getElementById('reset-btn').classList.add('hidden');
+    // Reset all screens
+    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active','slide-out'); });
+    document.getElementById('s-bienvenida').classList.add('active');
+    // Reset nav bars
+    document.querySelectorAll('[id^=bottom-nav],[id^=main-bottom-nav]').forEach(n => n.style.display='none');
+  }, 1000);
+}
+
+/* ============================================================
+   DEMO LOAD (quick start)
+   ============================================================ */
+function loadDemo() {
+  showLoading('Cargando perfil de demostración…');
+  state.user = { nombre:'María López', email:'maria@ejemplo.com', avatar:'M' };
+  state.habilidades = HABILIDADES_TRADUCIDAS;
+  state.habilidadesValidadas = HABILIDADES_TRADUCIDAS.slice(0,6).map(h=>h.nombre);
+  state.intereses = ['infantil','educacion'];
+  state.objetivo = 'cuidadora';
+  state.navUnlocked = true;
+  state.experiencias = DEMO_EXPERIENCIAS.map((e,i)=>({q:INTERVIEW_QA[i]?.q||'',a:e.title}));
+  saveState();
+  setTimeout(() => {
+    hideLoading();
+    document.getElementById('reset-btn').classList.remove('hidden');
+    goTo('s-oportunidades');
+  }, 1600);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  // Splash
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => { document.getElementById('splash').style.display='none'; }, 600);
+    // Try restore state
+    if(loadState() && state.navUnlocked) {
+      document.getElementById('reset-btn').classList.remove('hidden');
+      // Restore to current screen
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const cs = document.getElementById(state.currentScreen);
+      if(cs) { cs.classList.add('active'); onScreenEnter(state.currentScreen); }
+      else { document.getElementById('s-bienvenida').classList.add('active'); }
+      renderNavBars();
+    }
+  }, 2200);
+
+  // Enter key for chat
+  document.getElementById('chat-input').addEventListener('keydown', e => {
+    if(e.key === 'Enter') sendChatMessage();
+  });
+
+  // Enter key for registro
+  document.querySelectorAll('#form-registro .input').forEach(input => {
+    input.addEventListener('keydown', e => { if(e.key==='Enter') submitRegistro(); });
+  });
+});
+</script>
+</body>
+</html>
